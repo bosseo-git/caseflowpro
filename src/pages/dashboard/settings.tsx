@@ -17,7 +17,7 @@ interface UserSettings {
 
 export default function Settings() {
   const router = useRouter()
-  const { user, loading, mutateUser } = useUser({
+  const { user, loading } = useUser({
     redirectTo: '/login',
   })
 
@@ -87,9 +87,14 @@ export default function Settings() {
         throw new Error('Failed to save settings')
       }
 
-      const data = await response.json()
-      mutateUser(data)
+      // We can't use mutateUser since it doesn't exist
+      // Instead, just show success message and optionally reload user data
       toast.success('Settings saved successfully')
+      
+      // Refresh the page to get updated user data
+      setTimeout(() => {
+        router.reload()
+      }, 1500)
     } catch (error) {
       console.error('Error saving settings:', error)
       toast.error('Failed to save settings')
