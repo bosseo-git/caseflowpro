@@ -7,6 +7,10 @@ import { compare } from 'bcryptjs'
 
 const prisma = new PrismaClient()
 
+// This allows NextAuth to work on both production and preview URLs
+const useSecureCookies = process.env.NEXTAUTH_URL?.startsWith('https://') || process.env.VERCEL_URL?.startsWith('https://');
+const cookiePrefix = useSecureCookies ? '__Secure-' : '';
+
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
   providers: [
@@ -53,33 +57,33 @@ export const authOptions: NextAuthOptions = {
       }
     })
   ],
-  useSecureCookies: true,
+  useSecureCookies,
   cookies: {
     sessionToken: {
-      name: `__Secure-next-auth.session-token`,
+      name: `${cookiePrefix}next-auth.session-token`,
       options: {
         httpOnly: true,
         sameSite: "lax",
         path: "/",
-        secure: true
+        secure: useSecureCookies
       }
     },
     callbackUrl: {
-      name: `__Secure-next-auth.callback-url`,
+      name: `${cookiePrefix}next-auth.callback-url`,
       options: {
         httpOnly: true,
         sameSite: "lax",
         path: "/",
-        secure: true
+        secure: useSecureCookies
       }
     },
     csrfToken: {
-      name: `__Host-next-auth.csrf-token`,
+      name: `${useSecureCookies ? '__Host-' : ''}next-auth.csrf-token`,
       options: {
         httpOnly: true,
         sameSite: "lax",
         path: "/",
-        secure: true
+        secure: useSecureCookies
       }
     }
   },
@@ -111,7 +115,8 @@ export const authOptions: NextAuthOptions = {
       return session
     }
   },
-  debug: true,
+  // Only enable debug in development
+  debug: process.env.NODE_ENV !== 'production',
   secret: process.env.NEXTAUTH_SECRET
 }
 
