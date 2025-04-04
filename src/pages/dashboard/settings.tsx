@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
-import { DocumentPlusIcon } from '@heroicons/react/24/outline'
 import DashboardLayout from '@/components/DashboardLayout'
 import { useUser } from '@/lib/hooks'
 import toast from 'react-hot-toast'
@@ -237,10 +236,9 @@ export default function Settings() {
           <div className="flex justify-end">
             <button
               type="submit"
-              className="btn btn-primary inline-flex items-center"
+              className="btn btn-primary"
               disabled={isSaving}
             >
-              <DocumentPlusIcon className="w-5 h-5 mr-2" />
               {isSaving ? 'Saving...' : 'Save Settings'}
             </button>
           </div>
