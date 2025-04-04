@@ -27,7 +27,12 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const navigation = [
     { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
     { name: 'Analytics', href: '/dashboard/analytics', icon: ChartBarIcon },
-    { name: 'Widget Designer', href: '/dashboard/widget-designer', icon: DocumentTextIcon },
+    { 
+      name: 'Widget Designer', 
+      href: '/dashboard/widget-designer', 
+      icon: DocumentTextIcon,
+      badge: 'New'
+    },
     { name: 'Clients', href: '/dashboard/clients', icon: UserGroupIcon },
     { name: 'Settings', href: '/dashboard/settings', icon: Cog6ToothIcon },
     { name: 'Billing', href: '/dashboard/billing', icon: CreditCardIcon },
@@ -96,7 +101,12 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                     }`}
                     aria-hidden="true"
                   />
-                  {item.name}
+                  <span className="flex-1">{item.name}</span>
+                  {item.badge && (
+                    <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-800">
+                      {item.badge}
+                    </span>
+                  )}
                 </Link>
               )
             })}
