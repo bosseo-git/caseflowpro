@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
-import { SaveIcon } from '@heroicons/react/outline'
+import { DocumentPlusIcon } from '@heroicons/react/24/outline'
 import DashboardLayout from '@/components/DashboardLayout'
 import { useUser } from '@/lib/hooks'
 import toast from 'react-hot-toast'
@@ -240,7 +240,7 @@ export default function Settings() {
               className="btn btn-primary inline-flex items-center"
               disabled={isSaving}
             >
-              <SaveIcon className="w-5 h-5 mr-2" />
+              <DocumentPlusIcon className="w-5 h-5 mr-2" />
               {isSaving ? 'Saving...' : 'Save Settings'}
             </button>
           </div>
