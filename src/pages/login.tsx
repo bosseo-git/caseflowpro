@@ -19,6 +19,7 @@ export default function Login() {
   const { data: session, status } = useSession()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isGoogleSigningIn, setIsGoogleSigningIn] = useState(false)
+  const [detailedError, setDetailedError] = useState<string | null>(null)
   const { error, callbackUrl } = router.query
 
   const {
@@ -48,15 +49,23 @@ export default function Login() {
       if (error === 'CredentialsSignin') {
         toast('Invalid email or password', 'error')
       } else if (error === 'Callback') {
-        toast('Authentication error during callback. This is often caused by cookie or database issues.', 'error')
+        const errorMsg = 'Authentication error during callback. This is often caused by cookie or database issues.'
+        toast(errorMsg, 'error')
+        setDetailedError(`Error type: ${error}. This usually means the database couldn't create or find the user record. Check the database connection and permissions.`)
       } else if (error === 'OAuthSignin') {
         toast('Error starting Google sign-in. Please try again.', 'error')
+        setDetailedError('Failed to initialize the OAuth sign-in process with Google.')
       } else if (error === 'OAuthCallback') {
         toast('Error during Google callback. Please try again.', 'error') 
+        setDetailedError('Google authenticated you successfully but there was an error during the callback to our site.')
       } else if (error === 'OAuthCreateAccount') {
         toast('Error creating account with Google credentials.', 'error')
+        setDetailedError('We couldn\'t create an account using your Google credentials. This might be a database issue.')
+      } else if (error === 'AccessDenied') {
+        toast('Access denied. You may not have permission to sign in.', 'error')
       } else {
         toast(`Authentication error: ${error}`, 'error')
+        setDetailedError(`Unrecognized error type: ${error}. Check the console logs for more information.`)
       }
     }
   }, [error])
@@ -92,11 +101,12 @@ export default function Login() {
   const handleGoogleSignIn = async () => {
     try {
       setIsGoogleSigningIn(true)
+      setDetailedError(null)
       
-      // Using the direct approach with specific parameters
+      // For Google sign-in, it's often better to allow the redirect
+      // instead of handling it in client-side JS
       const destination = typeof callbackUrl === 'string' ? callbackUrl : '/dashboard'
       
-      // Important: we're using the absolute URL approach here
       await signIn('google', { 
         callbackUrl: destination,
         redirect: true
@@ -105,6 +115,26 @@ export default function Login() {
       console.error('Google sign-in error:', error)
       toast('An error occurred during Google sign-in', 'error')
       setIsGoogleSigningIn(false)
+      setDetailedError(`Error during Google sign-in: ${error instanceof Error ? error.message : String(error)}`)
+    }
+  }
+
+  // Function to test database connection (for debugging)
+  const testDatabaseConnection = async () => {
+    try {
+      const response = await fetch('/api/test-db')
+      const data = await response.json()
+      
+      if (data.success) {
+        toast('Database connection successful!', 'success')
+        setDetailedError(`Database info: ${JSON.stringify(data.details, null, 2)}`)
+      } else {
+        toast('Database connection failed!', 'error')
+        setDetailedError(`Database error: ${JSON.stringify(data.details, null, 2)}`)
+      }
+    } catch (error) {
+      toast('Error testing database connection', 'error')
+      setDetailedError(`Error: ${error instanceof Error ? error.message : String(error)}`)
     }
   }
 
@@ -138,6 +168,21 @@ export default function Login() {
                 Access your dashboard and manage your intake widget
               </p>
             </div>
+            
+            {detailedError && (
+              <div className="mb-6 p-4 border border-red-300 bg-red-50 rounded-md">
+                <h3 className="text-sm font-medium text-red-800 mb-1">Detailed Error Information</h3>
+                <p className="text-xs text-red-700 whitespace-pre-wrap">{detailedError}</p>
+                {process.env.NODE_ENV === 'development' && (
+                  <button 
+                    onClick={testDatabaseConnection}
+                    className="mt-2 text-xs bg-red-100 hover:bg-red-200 text-red-800 px-2 py-1 rounded"
+                  >
+                    Test Database Connection
+                  </button>
+                )}
+              </div>
+            )}
             
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
               <div>

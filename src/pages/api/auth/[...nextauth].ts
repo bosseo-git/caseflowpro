@@ -5,7 +5,17 @@ import { PrismaAdapter } from '@auth/prisma-adapter'
 import { PrismaClient } from '@prisma/client'
 import { compare } from 'bcryptjs'
 
-const prisma = new PrismaClient()
+// Log database connection attempts
+console.log("Database URL:", process.env.DATABASE_URL?.substring(0, 25) + "..." || "Not set");
+
+const prisma = new PrismaClient({
+  log: ['query', 'error', 'warn'],
+})
+
+// Test database connection
+prisma.$connect()
+  .then(() => console.log("Database connection successful"))
+  .catch((e) => console.error("Database connection failed:", e));
 
 // This allows NextAuth to work on both production and preview URLs
 const useSecureCookies = process.env.NEXTAUTH_URL?.startsWith('https://') || process.env.VERCEL_URL?.startsWith('https://');
@@ -99,25 +109,70 @@ export const authOptions: NextAuthOptions = {
     error: '/login'
   },
   callbacks: {
+    async signIn({ user, account, profile, email, credentials }) {
+      try {
+        // Log sign-in attempt info (without sensitive data)
+        console.log("Sign-in attempt:", { 
+          provider: account?.provider,
+          userId: user?.id,
+          userEmail: user?.email
+        });
+        return true;
+      } catch (error) {
+        console.error("Error in signIn callback:", error);
+        return false;
+      }
+    },
     async jwt({ token, user, account }) {
-      if (user) {
-        token.id = user.id
+      try {
+        if (user) {
+          token.id = user.id
+        }
+        if (account) {
+          token.accessToken = account.access_token
+        }
+        return token;
+      } catch (error) {
+        console.error("Error in JWT callback:", error);
+        return token;
       }
-      if (account) {
-        token.accessToken = account.access_token
-      }
-      return token
     },
     async session({ session, token }) {
-      if (session.user) {
-        session.user.id = token.id as string
+      try {
+        if (session.user) {
+          session.user.id = token.id as string
+        }
+        return session;
+      } catch (error) {
+        console.error("Error in session callback:", error);
+        return session;
       }
-      return session
     }
   },
-  // Only enable debug in development
-  debug: process.env.NODE_ENV !== 'production',
-  secret: process.env.NEXTAUTH_SECRET
+  // Enable debug mode to see detailed errors
+  debug: true,
+  secret: process.env.NEXTAUTH_SECRET,
+  // Add better error handling
+  events: {
+    async signIn(message) {
+      console.log("User signed in successfully:", {
+        userId: message.user.id,
+        provider: message.account?.provider
+      });
+    },
+    async createUser(message) {
+      console.log("New user created:", message.user.id);
+    },
+    async linkAccount(message) {
+      console.log("Account linked:", {
+        userId: message.user.id,
+        provider: message.account.provider
+      });
+    },
+    async session(message) {
+      console.log("Session accessed:", message.session.user.id);
+    }
+  }
 }
 
 export default NextAuth(authOptions) 
