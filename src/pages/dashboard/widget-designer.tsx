@@ -27,14 +27,18 @@ export default function WidgetDesigner() {
   const [isLoading, setIsLoading] = useState(true)
   const [savedSettings, setSavedSettings] = useState<ModalDesignSettings | null>(null)
 
+  console.log('Widget Designer - Rendering', { status, session: session?.user?.email })
+
   // Redirect if not authenticated
   if (status === 'unauthenticated') {
+    console.log('Widget Designer - User not authenticated, redirecting to login')
     router.push('/login')
     return null
   }
 
   // Load user's widget settings on component mount
   useEffect(() => {
+    console.log('Widget Designer - useEffect triggered', { authenticated: status === 'authenticated' })
     if (status === 'authenticated') {
       loadWidgetSettings()
     }
@@ -42,10 +46,17 @@ export default function WidgetDesigner() {
 
   // Load widget settings from the API
   const loadWidgetSettings = async () => {
+    console.log('Widget Designer - Loading settings')
     try {
       setIsLoading(true)
       const response = await fetch('/api/widget-settings')
       const data = await response.json()
+      
+      console.log('Widget Designer - Settings loaded', { 
+        success: response.ok, 
+        status: response.status,
+        hasSettings: !!data.settings
+      })
       
       if (data.settings) {
         setSavedSettings(data.settings as ModalDesignSettings)
