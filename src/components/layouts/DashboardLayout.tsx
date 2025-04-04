@@ -28,14 +28,14 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
     { name: 'Analytics', href: '/dashboard/analytics', icon: ChartBarIcon },
     { 
-      name: 'Widget Designer', 
+      name: 'Widget Generator', 
       href: '/dashboard/widget-designer', 
       icon: DocumentTextIcon,
       badge: 'New'
     },
     { name: 'Clients', href: '/dashboard/clients', icon: UserGroupIcon },
-    { name: 'Settings', href: '/dashboard/settings', icon: Cog6ToothIcon },
-    { name: 'Billing', href: '/dashboard/billing', icon: CreditCardIcon },
+    { name: 'Integration Settings', href: '/dashboard/settings', icon: Cog6ToothIcon },
+    { name: 'Subscription', href: '/dashboard/billing', icon: CreditCardIcon },
   ]
 
   const closeSidebar = () => {
