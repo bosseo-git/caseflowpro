@@ -4,13 +4,13 @@ import { PlusIcon, XMarkIcon, ClipboardDocumentIcon } from '@heroicons/react/24/
 import { toast } from '@/components/ui/Toaster'
 import DashboardLayout from '@/components/DashboardLayout'
 
-type FormValues = {
+type FormData = {
   phoneNumber: string
   whatsappNumber: string
-  goHighLevelLocationId: string
+  crmWebhookUrl: string
   welcomeMessage: string
   accentColor: string
-  position: string
+  position: 'bottom-right' | 'bottom-left' | 'top-right' | 'top-left'
   showOnMobile: boolean
   callButtonText: string
   smsButtonText: string
@@ -32,16 +32,16 @@ export default function ScriptGenerator() {
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isSubmitting },
     setValue,
     watch,
-  } = useForm<FormValues>({
+  } = useForm<FormData>({
     defaultValues: {
       phoneNumber: '',
       whatsappNumber: '',
-      goHighLevelLocationId: '',
-      welcomeMessage: 'Need help with your case? Contact us now!',
-      accentColor: '#0284c7',
+      crmWebhookUrl: '',
+      welcomeMessage: 'How can we help you today?',
+      accentColor: '#4f46e5',
       position: 'bottom-right',
       showOnMobile: true,
       callButtonText: 'Call Now',
@@ -110,7 +110,7 @@ export default function ScriptGenerator() {
     )
   }
   
-  const onSubmit = (data: FormValues) => {
+  const onSubmit = (data: FormData) => {
     // Convert custom fields to the format expected
     const formattedFields = customFields
       .filter((field) => field.label.trim() !== '')
@@ -525,7 +525,7 @@ export default function ScriptGenerator() {
       <div className="px-4 py-6">
         <h1 className="mb-6 text-2xl font-bold">Website Widget Generator</h1>
         <p className="mb-8 text-gray-600">
-          Customize how the Case Queue widget appears on your website and generate an installation script that integrates with GoHighLevel.
+          Customize how the CaseFlowPro widget appears on your website and generate an installation script that integrates with your CRM.
         </p>
         
         <div className="grid gap-8 md:grid-cols-3">
@@ -570,20 +570,20 @@ export default function ScriptGenerator() {
                 </div>
                 
                 <div>
-                  <label htmlFor="goHighLevelLocationId" className="block mb-2 text-sm font-medium text-gray-700">
-                    GoHighLevel Location ID
+                  <label htmlFor="crmWebhookUrl" className="block mb-2 text-sm font-medium text-gray-700">
+                    CRM Webhook URL
                   </label>
                   <input
-                    id="goHighLevelLocationId"
+                    id="crmWebhookUrl"
                     type="text"
                     className="input"
-                    {...register('goHighLevelLocationId', { required: 'GoHighLevel Location ID is required' })}
+                    {...register('crmWebhookUrl', { required: 'CRM Webhook URL is required' })}
                   />
-                  {errors.goHighLevelLocationId && (
-                    <p className="mt-1 text-sm text-red-600">{errors.goHighLevelLocationId.message}</p>
+                  {errors.crmWebhookUrl && (
+                    <p className="mt-1 text-sm text-red-600">{errors.crmWebhookUrl.message}</p>
                   )}
                   <p className="mt-1 text-xs text-gray-500">
-                    This ID is used to connect form submissions to your GoHighLevel workflows.
+                    This URL is used to connect form submissions to your CRM or automation platform.
                   </p>
                 </div>
               </div>

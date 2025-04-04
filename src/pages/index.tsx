@@ -5,6 +5,8 @@ import Image from 'next/image'
 import { CheckIcon } from '@heroicons/react/24/outline'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
+import Lottie from 'lottie-react'
+import animationData from './images/Animation - 1743791739377.json'
 
 const tiers = [
   {
@@ -16,7 +18,7 @@ const tiers = [
       'Website Widget with 4 Contact Options',
       'Customizable Intake Forms',
       'Client Dashboard',
-      'GoHighLevel Integration',
+      'CRM Integration',
       'Basic Analytics',
     ],
     cta: 'Start with Website',
@@ -31,7 +33,7 @@ const tiers = [
       'Website Widget with 4 Contact Options',
       'Advanced Form Customization',
       'Client Dashboard',
-      'GoHighLevel Integration',
+      'CRM Integration',
       'SMS Automation Workflows',
       'WhatsApp Integration',
       'Chat History & Analytics',
@@ -48,12 +50,12 @@ const tiers = [
       'Website Widget with 4 Contact Options',
       'Advanced Form Customization',
       'Client Dashboard',
-      'GoHighLevel Integration',
+      'CRM Integration',
       'SMS Automation Workflows',
       'WhatsApp Integration',
       'Chat History & Analytics',
       'Custom Branding',
-      'Advanced GoHighLevel Automations',
+      'Advanced CRM Automations',
       'Marketing Campaign Integration',
       'Priority Support',
     ],
@@ -77,7 +79,7 @@ export default function Home() {
                   Transform Your Law Firm's Client Intake Process
                 </h1>
                 <p className="text-xl mb-8">
-                  CaseFlowPro connects your website directly with GoHighLevel, creating a seamless client intake experience.
+                  CaseFlowPro connects your website directly with your law firm CRM, creating a seamless client intake experience.
                 </p>
                 <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4">
                   <Link
@@ -95,12 +97,10 @@ export default function Home() {
                 </div>
               </div>
               <div className="md:w-1/2">
-                <Image
-                  src="/images/hero-image.png"
-                  alt="CaseFlowPro Dashboard"
-                  width={600}
-                  height={400}
-                  className="rounded-lg shadow-xl"
+                <Lottie 
+                  animationData={animationData} 
+                  className="rounded-lg" 
+                  style={{ height: 400 }}
                 />
               </div>
             </div>
@@ -133,7 +133,7 @@ export default function Home() {
                 </div>
                 <h3 className="mb-2 text-xl font-semibold">SMS Contact</h3>
                 <p className="text-gray-600">
-                  Collect client information through a customizable form that integrates with GoHighLevel.
+                  Collect client information through a customizable form that integrates with your CRM.
                 </p>
               </div>
               
@@ -164,13 +164,13 @@ export default function Home() {
           </div>
         </section>
 
-        {/* GoHighLevel Integration Section */}
+        {/* Integration Section */}
         <section className="py-20 bg-gray-50">
           <div className="container px-4 mx-auto">
             <div className="max-w-3xl mx-auto text-center mb-12">
-              <h2 className="mb-4 text-3xl font-bold md:text-4xl">Seamless GoHighLevel Integration</h2>
+              <h2 className="mb-4 text-3xl font-bold md:text-4xl">Universal CRM Integration</h2>
               <p className="text-lg text-gray-600">
-                CaseFlowPro connects directly with your GoHighLevel workflows, making client intake effortless and efficient.
+                CaseFlowPro connects with all popular law firm CRMs, Zapier, Make, and more, making client intake effortless and efficient.
               </p>
             </div>
             
@@ -183,7 +183,7 @@ export default function Home() {
                 </div>
                 <h3 className="mb-2 text-lg font-semibold">Instant Lead Creation</h3>
                 <p className="text-gray-600">
-                  Form submissions automatically create new leads in your GoHighLevel account with all the information you need.
+                  Form submissions automatically create new leads in your CRM with all the information you need.
                 </p>
               </div>
               
@@ -195,7 +195,7 @@ export default function Home() {
                 </div>
                 <h3 className="mb-2 text-lg font-semibold">Workflow Automation</h3>
                 <p className="text-gray-600">
-                  Trigger automated follow-up sequences, task assignments, and notifications through GoHighLevel workflows.
+                  Trigger automated follow-up sequences, task assignments, and notifications through your CRM or automation tools like Zapier and Make.
                 </p>
               </div>
               
@@ -207,7 +207,7 @@ export default function Home() {
                 </div>
                 <h3 className="mb-2 text-lg font-semibold">Custom Form Mapping</h3>
                 <p className="text-gray-600">
-                  Map each field from your intake forms to specific fields in GoHighLevel for complete control over your data.
+                  Map each field from your intake forms to specific fields in your law firm CRM for complete control over your data.
                 </p>
               </div>
             </div>
@@ -300,7 +300,7 @@ export default function Home() {
                   </div>
                 </div>
                 <p className="italic text-gray-600">
-                  "The integration with GoHighLevel is seamless. Our workflow automation saves hours of manual work, and the lead quality has improved dramatically."
+                  "The integration with our CRM is seamless. Our workflow automation saves hours of manual work, and the lead quality has improved dramatically."
                 </p>
               </div>
               

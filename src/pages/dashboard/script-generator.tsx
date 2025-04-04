@@ -277,8 +277,8 @@ export default function ScriptGenerator() {
           formData.caseDetails = form.elements.caseDetails.value;
         }
         
-        // Send data to GoHighLevel webhook
-        sendToGoHighLevel(formData);
+        // Send data to CRM
+        sendToCRM(formData);
         
         // Replace form with thank you message
         formContainer.innerHTML = '';
@@ -388,18 +388,18 @@ export default function ScriptGenerator() {
       return container;
     }
     
-    // Send data to GoHighLevel
-    function sendToGoHighLevel(formData) {
-      // Check if user has GoHighLevel settings in their account
-      var ghlWebhookUrl = '${process.env.NEXT_PUBLIC_GHL_WEBHOOK_URL || ''}' || window.caseQueueSettings?.ghlWebhookUrl;
+    // Send data to CRM
+    function sendToCRM(formData) {
+      // Check if user has CRM integration settings in their account
+      var webhookUrl = '${process.env.NEXT_PUBLIC_WEBHOOK_URL || ''}' || window.caseQueueSettings?.webhookUrl;
       
-      if (!ghlWebhookUrl) {
-        console.error('GoHighLevel webhook URL not configured');
+      if (!webhookUrl) {
+        console.error('CRM webhook URL not configured');
         return;
       }
       
       // Send data to webhook
-      fetch(ghlWebhookUrl, {
+      fetch(webhookUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -413,7 +413,7 @@ export default function ScriptGenerator() {
         return response.json();
       })
       .catch(error => {
-        console.error('Error sending data to GoHighLevel:', error);
+        console.error('Error sending data to CRM:', error);
       });
     }
     
@@ -655,7 +655,7 @@ export default function ScriptGenerator() {
             <ol className="list-decimal pl-5 space-y-2">
               <li>Copy the code above</li>
               <li>Paste it just before the closing <code className="bg-gray-100 px-1 py-0.5 rounded">&lt;/body&gt;</code> tag of your website</li>
-              <li>Make sure to configure your GoHighLevel webhook in the settings page</li>
+              <li>Make sure to configure your CRM integration in the settings page</li>
             </ol>
           </div>
         </div>

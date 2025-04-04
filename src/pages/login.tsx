@@ -1,9 +1,9 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import Head from 'next/head'
 import { useForm } from 'react-hook-form'
-import { signIn } from 'next-auth/react'
+import { signIn, useSession } from 'next-auth/react'
 import { toast } from '@/components/ui/Toaster'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
@@ -16,7 +16,9 @@ type FormValues = {
 
 export default function Login() {
   const router = useRouter()
+  const { data: session, status } = useSession()
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const { error } = router.query
 
   const {
     register,
@@ -30,6 +32,24 @@ export default function Login() {
     }
   })
 
+  // If user is already logged in, redirect to dashboard
+  useEffect(() => {
+    if (status === 'authenticated' && session) {
+      router.push('/dashboard')
+    }
+  }, [session, status, router])
+
+  // Handle error messages from NextAuth
+  useEffect(() => {
+    if (error) {
+      if (error === 'CredentialsSignin') {
+        toast('Invalid email or password', 'error')
+      } else {
+        toast(`Authentication error: ${error}`, 'error')
+      }
+    }
+  }, [error])
+
   const onSubmit = async (data: FormValues) => {
     setIsSubmitting(true)
     
@@ -42,7 +62,7 @@ export default function Login() {
       
       if (result?.error) {
         toast('Invalid email or password', 'error')
-      } else {
+      } else if (result?.ok) {
         toast('Login successful!', 'success')
         
         // Redirect to dashboard after a short delay
@@ -56,6 +76,18 @@ export default function Login() {
     } finally {
       setIsSubmitting(false)
     }
+  }
+
+  if (status === 'loading') {
+    return (
+      <div className="flex flex-col min-h-screen">
+        <Header />
+        <main className="flex-grow flex items-center justify-center">
+          <p>Loading...</p>
+        </main>
+        <Footer />
+      </div>
+    )
   }
 
   return (

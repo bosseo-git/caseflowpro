@@ -36,6 +36,12 @@ npx prisma db push
 echo "Building the application..."
 npm run build
 
+echo "Creating demo account..."
+npm run create-demo
+
+echo "Starting the development server..."
+npm run dev &
+
 echo "============================================="
 echo "Setup complete! You can now start the development server with:"
 echo "npm run dev"
@@ -50,4 +56,11 @@ echo "5. Generate your widget at http://localhost:3000/dashboard/script-generato
 echo ""
 echo "For testing the widget with ngrok, run:"
 echo "npx ngrok http 3000"
-echo "Then use the ngrok URL in your GoHighLevel webhook configuration" 
+echo "Then use the ngrok URL in your GoHighLevel webhook configuration"
+echo ""
+echo "Login with demo account:"
+echo "   Email: demo@caseflowpro.com"
+echo "   Password: demo123"
+echo "Or create your own account and configure settings"
+echo "6. Generate a widget from the dashboard"
+echo "7. Test with ngrok for external access (optional)" 

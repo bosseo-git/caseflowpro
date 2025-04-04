@@ -8,10 +8,10 @@ interface UserSettings {
   companyName: string
   phone: string
   whatsAppNumber: string
-  ghlSettings: {
-    locationId: string
+  crmSettings: {
     apiKey: string
     webhookUrl: string
+    crmType: string
   }
 }
 
@@ -25,10 +25,10 @@ export default function Settings() {
     companyName: '',
     phone: '',
     whatsAppNumber: '',
-    ghlSettings: {
-      locationId: '',
+    crmSettings: {
       apiKey: '',
       webhookUrl: '',
+      crmType: 'other'
     }
   })
 
@@ -41,24 +41,24 @@ export default function Settings() {
         companyName: user.companyName || '',
         phone: user.phone || '',
         whatsAppNumber: user.whatsAppNumber || '',
-        ghlSettings: {
-          locationId: user.ghlSettings?.locationId || '',
+        crmSettings: {
           apiKey: user.ghlSettings?.apiKey || '',
           webhookUrl: user.ghlSettings?.webhookUrl || '',
+          crmType: user.ghlSettings?.crmType || 'other'
         }
       })
     }
   }, [user])
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target
     
-    if (name.startsWith('ghlSettings.')) {
+    if (name.startsWith('crmSettings.')) {
       const field = name.split('.')[1]
       setSettings(prev => ({
         ...prev,
-        ghlSettings: {
-          ...prev.ghlSettings,
+        crmSettings: {
+          ...prev.crmSettings,
           [field]: value
         }
       }))
@@ -80,15 +80,21 @@ export default function Settings() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(settings),
+        body: JSON.stringify({
+          ...settings,
+          // Map back to ghlSettings for API compatibility
+          ghlSettings: {
+            apiKey: settings.crmSettings.apiKey,
+            webhookUrl: settings.crmSettings.webhookUrl,
+            crmType: settings.crmSettings.crmType
+          }
+        }),
       })
 
       if (!response.ok) {
         throw new Error('Failed to save settings')
       }
 
-      // We can't use mutateUser since it doesn't exist
-      // Instead, just show success message and optionally reload user data
       toast.success('Settings saved successfully')
       
       // Refresh the page to get updated user data
@@ -164,31 +170,36 @@ export default function Settings() {
             </div>
           </div>
           
-          {/* GoHighLevel Integration */}
+          {/* CRM Integration */}
           <div className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-lg font-medium mb-4">GoHighLevel Integration</h2>
+            <h2 className="text-lg font-medium mb-4">CRM Integration</h2>
             
             <div className="mb-4">
               <p className="text-sm text-gray-600">
-                Connect your GoHighLevel account to enable lead collection and automation. You'll need to create API credentials in your GoHighLevel account.
+                Connect your CRM account to enable lead collection and automation. CaseFlowPro integrates with all popular law firm CRMs, Zapier, Make, and more.
               </p>
             </div>
             
             <div className="grid grid-cols-1 gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Location ID
+                  CRM Type
                 </label>
-                <input
-                  type="text"
-                  name="ghlSettings.locationId"
-                  value={settings.ghlSettings.locationId}
+                <select
+                  name="crmSettings.crmType"
+                  value={settings.crmSettings.crmType}
                   onChange={handleInputChange}
                   className="input-field w-full"
-                />
-                <p className="mt-1 text-sm text-gray-500">
-                  Your GoHighLevel location ID (found in Location Settings)
-                </p>
+                >
+                  <option value="clio">Clio</option>
+                  <option value="smokeball">Smokeball</option>
+                  <option value="filevine">Filevine</option>
+                  <option value="lawmatics">Lawmatics</option>
+                  <option value="practice_panther">Practice Panther</option>
+                  <option value="zapier">Zapier</option>
+                  <option value="make">Make.com</option>
+                  <option value="other">Other CRM</option>
+                </select>
               </div>
               
               <div>
@@ -197,13 +208,13 @@ export default function Settings() {
                 </label>
                 <input
                   type="password"
-                  name="ghlSettings.apiKey"
-                  value={settings.ghlSettings.apiKey}
+                  name="crmSettings.apiKey"
+                  value={settings.crmSettings.apiKey}
                   onChange={handleInputChange}
                   className="input-field w-full"
                 />
                 <p className="mt-1 text-sm text-gray-500">
-                  Your GoHighLevel API key (create one in Developer Settings)
+                  Your CRM API key (create one in your CRM's developer settings)
                 </p>
               </div>
               
@@ -213,25 +224,25 @@ export default function Settings() {
                 </label>
                 <input
                   type="url"
-                  name="ghlSettings.webhookUrl"
-                  value={settings.ghlSettings.webhookUrl}
+                  name="crmSettings.webhookUrl"
+                  value={settings.crmSettings.webhookUrl}
                   onChange={handleInputChange}
                   className="input-field w-full"
                 />
                 <p className="mt-1 text-sm text-gray-500">
-                  URL for your GoHighLevel webhook (create one in Settings → Webhooks)
+                  URL for your webhook (used for integration with your CRM)
                 </p>
               </div>
               
-              <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-md">
-                <h3 className="text-sm font-medium text-yellow-800 mb-2">How to set up your GoHighLevel integration</h3>
-                <ol className="list-decimal pl-5 text-sm text-yellow-700 space-y-1">
-                  <li>Log in to your GoHighLevel account</li>
-                  <li>Go to Settings → Developer Settings → API Keys</li>
+              <div className="p-4 bg-blue-50 border border-blue-200 rounded-md">
+                <h3 className="text-sm font-medium text-blue-800 mb-2">CRM Integration Guide</h3>
+                <ol className="list-decimal pl-5 text-sm text-blue-700 space-y-1">
+                  <li>Log in to your CRM account</li>
+                  <li>Navigate to the API or Developer Settings section</li>
                   <li>Create a new API key with appropriate permissions</li>
-                  <li>Go to Settings → Webhooks</li>
-                  <li>Create webhooks for Contact Created, Form Submission, and SMS/Message events</li>
-                  <li>Copy the webhook URLs and paste them here</li>
+                  <li>Set up webhook endpoints for contact creation and form submissions</li>
+                  <li>Copy the API key and webhook URLs and paste them here</li>
+                  <li>For Zapier/Make integration, create a webhook trigger in your automation flow</li>
                 </ol>
               </div>
             </div>
