@@ -35,4 +35,11 @@ next-env.d.ts
 
 # IDE specific files
 .idea
-.vscode 
+.vscode
+
+# Google Cloud credentials
+bosseo-dcb0bd2b993b.json
+*.json.key
+*-credentials.json
+service-account-*.json
+*-service-account.json 
