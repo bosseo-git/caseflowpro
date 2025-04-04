@@ -51,10 +51,10 @@ export default function Header() {
             </>
           ) : (
             <>
-              <Link href="/login" className="text-gray-600 transition hover:text-primary-600">
+              <Link href="/login" className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-primary-700 bg-white border border-primary-300 rounded-md shadow-sm hover:bg-primary-50 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2">
                 Log In
               </Link>
-              <Link href="/signup" className="btn-primary">
+              <Link href="/signup" className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-primary-600 to-secondary-600 border border-transparent rounded-md shadow-sm hover:from-primary-700 hover:to-secondary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2">
                 Sign Up
               </Link>
             </>
@@ -115,14 +115,14 @@ export default function Header() {
               <>
                 <Link
                   href="/login"
-                  className="block px-3 py-2 text-base font-medium text-gray-600 transition rounded-md hover:bg-gray-100 hover:text-primary-600"
+                  className="block px-3 py-2 text-base font-medium text-primary-700 bg-white border border-primary-300 rounded-md hover:bg-primary-50 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   Log In
                 </Link>
                 <Link
                   href="/signup"
-                  className="block px-3 py-2 mt-2 text-base font-medium text-white transition rounded-md bg-primary-600 hover:bg-primary-700"
+                  className="block px-3 py-2 mt-2 text-base font-medium text-white bg-gradient-to-r from-primary-600 to-secondary-600 border border-transparent rounded-md hover:from-primary-700 hover:to-secondary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   Sign Up
