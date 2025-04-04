@@ -284,4 +284,7 @@ export default function SignUp() {
         </div>
       </main>
       
- 
+      <Footer />
+    </div>
+  )
+} 
