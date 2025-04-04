@@ -18,7 +18,8 @@ export default function Login() {
   const router = useRouter()
   const { data: session, status } = useSession()
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const { error } = router.query
+  const [isGoogleSigningIn, setIsGoogleSigningIn] = useState(false)
+  const { error, callbackUrl } = router.query
 
   const {
     register,
@@ -42,8 +43,18 @@ export default function Login() {
   // Handle error messages from NextAuth
   useEffect(() => {
     if (error) {
+      console.error('Authentication error:', error)
+      
       if (error === 'CredentialsSignin') {
         toast('Invalid email or password', 'error')
+      } else if (error === 'Callback') {
+        toast('Authentication error during callback. This is often caused by cookie or database issues.', 'error')
+      } else if (error === 'OAuthSignin') {
+        toast('Error starting Google sign-in. Please try again.', 'error')
+      } else if (error === 'OAuthCallback') {
+        toast('Error during Google callback. Please try again.', 'error') 
+      } else if (error === 'OAuthCreateAccount') {
+        toast('Error creating account with Google credentials.', 'error')
       } else {
         toast(`Authentication error: ${error}`, 'error')
       }
@@ -80,10 +91,20 @@ export default function Login() {
 
   const handleGoogleSignIn = async () => {
     try {
-      await signIn('google', { callbackUrl: '/dashboard' })
+      setIsGoogleSigningIn(true)
+      
+      // Using the direct approach with specific parameters
+      const destination = typeof callbackUrl === 'string' ? callbackUrl : '/dashboard'
+      
+      // Important: we're using the absolute URL approach here
+      await signIn('google', { 
+        callbackUrl: destination,
+        redirect: true
+      })
     } catch (error) {
       console.error('Google sign-in error:', error)
       toast('An error occurred during Google sign-in', 'error')
+      setIsGoogleSigningIn(false)
     }
   }
 
@@ -193,6 +214,7 @@ export default function Login() {
               <button
                 type="button"
                 onClick={handleGoogleSignIn}
+                disabled={isGoogleSigningIn}
                 className="btn btn-outline w-full flex items-center justify-center"
               >
                 <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
@@ -201,7 +223,7 @@ export default function Login() {
                     d="M12.545 10.239v3.821h5.445c-.712 2.315-2.647 3.972-5.445 3.972a6.033 6.033 0 110-12.064c1.498 0 2.866.549 3.921 1.453l2.814-2.814A9.969 9.969 0 0012.545 2C8.849 2 5.58 4.152 3.875 7.258c-.857 1.562-1.346 3.354-1.346 5.258 0 1.904.489 3.696 1.346 5.258 1.706 3.107 4.975 5.258 8.67 5.258 4.783 0 8.913-3.477 9.693-8.174A9.798 9.798 0 0022.57 12.5c0-.705-.06-1.41-.179-2.082z"
                   ></path>
                 </svg>
-                Sign in with Google
+                {isGoogleSigningIn ? 'Connecting to Google...' : 'Sign in with Google'}
               </button>
               
               <p className="text-center text-gray-600 mt-6">
