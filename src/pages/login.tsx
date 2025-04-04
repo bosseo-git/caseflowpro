@@ -78,6 +78,15 @@ export default function Login() {
     }
   }
 
+  const handleGoogleSignIn = async () => {
+    try {
+      await signIn('google', { callbackUrl: '/dashboard' })
+    } catch (error) {
+      console.error('Google sign-in error:', error)
+      toast('An error occurred during Google sign-in', 'error')
+    }
+  }
+
   if (status === 'loading') {
     return (
       <div className="flex flex-col min-h-screen">
@@ -183,7 +192,7 @@ export default function Login() {
               
               <button
                 type="button"
-                onClick={() => signIn('google', { callbackUrl: '/dashboard' })}
+                onClick={handleGoogleSignIn}
                 className="btn btn-outline w-full flex items-center justify-center"
               >
                 <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
