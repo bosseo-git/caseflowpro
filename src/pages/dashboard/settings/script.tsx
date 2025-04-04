@@ -122,7 +122,7 @@ export default function ScriptGenerator() {
     
     // Generate the configuration
     const config = {
-      locationId: data.goHighLevelLocationId,
+      locationId: data.crmWebhookUrl,
       phoneNumber: data.phoneNumber,
       whatsappNumber: data.whatsappNumber,
       widgetConfig: {
@@ -294,8 +294,8 @@ export default function ScriptGenerator() {
         formObject[key] = value;
       });
       
-      // Send to GoHighLevel
-      fetch('https://app.casequeue.com/api/submit?locationId=' + "${config.locationId}", {
+      // Send to CRM integration
+      fetch('https://app.casequeue.com/api/submit?webhookUrl=' + "${config.locationId}", {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
