@@ -43,3 +43,4 @@ bosseo-dcb0bd2b993b.json
 *-credentials.json
 service-account-*.json
 *-service-account.json 
+node_modules

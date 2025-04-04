@@ -19,7 +19,7 @@ export default function Header() {
       <div className="container flex items-center justify-between px-4 py-4 mx-auto">
         <div className="flex items-center">
           <Link href="/" className="text-2xl font-bold text-primary-600">
-            Case<span className="text-secondary-600">Queue</span>
+            Case<span className="text-secondary-600">FlowPro</span>
           </Link>
         </div>
 
