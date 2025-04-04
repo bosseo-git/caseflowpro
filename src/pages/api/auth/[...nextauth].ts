@@ -8,9 +8,20 @@ import { compare } from 'bcryptjs'
 // Log database connection attempts
 console.log("Database URL:", process.env.DATABASE_URL?.substring(0, 25) + "..." || "Not set");
 
-const prisma = new PrismaClient({
-  log: ['query', 'error', 'warn'],
-})
+// Optimize Prisma for serverless environment
+let prisma: PrismaClient;
+
+if (process.env.NODE_ENV === 'production') {
+  prisma = new PrismaClient({
+    log: ['error', 'warn'],
+    datasourceUrl: process.env.POSTGRES_PRISMA_URL,
+  });
+} else {
+  // In development, use a more verbose logging
+  prisma = new PrismaClient({
+    log: ['query', 'error', 'warn'],
+  });
+}
 
 // Test database connection
 prisma.$connect()

@@ -4,11 +4,13 @@
 
 generator client {
   provider = "prisma-client-js"
+  previewFeatures = ["metrics"]
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL") // Standard connection string
+  directUrl = env("POSTGRES_URL_NON_POOLING")
 }
 
 model User {

@@ -34,15 +34,24 @@ export default function Login() {
     }
   })
 
+  // Fix for useLayoutEffect warning on server - use isClient to ensure we're on the client
+  const [isClient, setIsClient] = useState(false)
+
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
+
   // If user is already logged in, redirect to dashboard
   useEffect(() => {
-    if (status === 'authenticated' && session) {
+    if (isClient && status === 'authenticated' && session) {
       router.push('/dashboard')
     }
-  }, [session, status, router])
+  }, [session, status, router, isClient])
 
   // Handle error messages from NextAuth
   useEffect(() => {
+    if (!isClient) return
+
     if (error) {
       console.error('Authentication error:', error)
       
@@ -68,7 +77,7 @@ export default function Login() {
         setDetailedError(`Unrecognized error type: ${error}. Check the console logs for more information.`)
       }
     }
-  }, [error])
+  }, [error, isClient])
 
   const onSubmit = async (data: FormValues) => {
     setIsSubmitting(true)

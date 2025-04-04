@@ -1,0 +1,21 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/next"
+    }
+  ],
+  "crons": [
+    {
+      "path": "/api/cron/health-check",
+      "schedule": "0 */6 * * *"
+    }
+  ],
+  "git": {
+    "deploymentEnabled": {
+      "main": true,
+      "preview": true
+    }
+  }
+} 
