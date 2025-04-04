@@ -1,11 +1,19 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Head from 'next/head'
 import Link from 'next/link'
 import Image from 'next/image'
 import { CheckIcon } from '@heroicons/react/24/outline'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
-import Lottie from 'lottie-react'
+import dynamic from 'next/dynamic'
+
+// Dynamically import the Lottie component with SSR disabled
+const Lottie = dynamic(() => import('lottie-react'), { 
+  ssr: false,
+  loading: () => <div style={{ height: 400 }} className="rounded-lg bg-gray-100 animate-pulse" />
+})
+
+// Import the animation data
 import animationData from './images/Animation - 1743791739377.json'
 
 const tiers = [
@@ -65,6 +73,13 @@ const tiers = [
 ]
 
 export default function Home() {
+  const [isMounted, setIsMounted] = useState(false)
+
+  // Only render Lottie after component is mounted
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
+
   return (
     <div className="flex flex-col min-h-screen">
       <Header />
@@ -97,11 +112,15 @@ export default function Home() {
                 </div>
               </div>
               <div className="md:w-1/2">
-                <Lottie 
-                  animationData={animationData} 
-                  className="rounded-lg" 
-                  style={{ height: 400 }}
-                />
+                {isMounted ? (
+                  <Lottie 
+                    animationData={animationData} 
+                    className="rounded-lg" 
+                    style={{ height: 400 }}
+                  />
+                ) : (
+                  <div style={{ height: 400 }} className="rounded-lg bg-gray-100" />
+                )}
               </div>
             </div>
           </div>
