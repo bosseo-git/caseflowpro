@@ -18,11 +18,24 @@ export default function ScriptGenerator() {
     companyPhone: '',
     companyWhatsApp: '',
     theme: 'light',
+    layout: 'classic',
     buttonLabels: {
       call: 'Call Now',
       sms: 'SMS Us',
       whatsapp: 'WhatsApp',
-      value: 'Case Value'
+      chat: 'Live Chat'
+    },
+    buttonActions: {
+      call: 'phone',
+      sms: 'form',
+      whatsapp: 'whatsapp',
+      chat: 'form'
+    },
+    buttonColors: {
+      call: '#2196F3',
+      sms: '#9E9E9E',
+      whatsapp: '#4CAF50',
+      chat: '#673AB7'
     }
   })
 
@@ -54,6 +67,24 @@ export default function ScriptGenerator() {
           [buttonType]: value
         }
       }))
+    } else if (name.startsWith('buttonActions.')) {
+      const buttonType = name.split('.')[1]
+      setWidgetSettings(prev => ({
+        ...prev,
+        buttonActions: {
+          ...prev.buttonActions,
+          [buttonType]: value
+        }
+      }))
+    } else if (name.startsWith('buttonColors.')) {
+      const buttonType = name.split('.')[1]
+      setWidgetSettings(prev => ({
+        ...prev,
+        buttonColors: {
+          ...prev.buttonColors,
+          [buttonType]: value
+        }
+      }))
     } else {
       setWidgetSettings(prev => ({
         ...prev,
@@ -63,7 +94,19 @@ export default function ScriptGenerator() {
   }
 
   const generateScript = () => {
-    const { primaryColor, secondaryColor, position, companyName, companyPhone, companyWhatsApp, buttonLabels, theme } = widgetSettings
+    const { 
+      primaryColor, 
+      secondaryColor, 
+      position, 
+      companyName, 
+      companyPhone, 
+      companyWhatsApp, 
+      buttonLabels, 
+      buttonActions,
+      buttonColors,
+      theme, 
+      layout 
+    } = widgetSettings
     
     // Calculate colors based on theme
     const bgColor = theme === 'dark' ? '#1E1E1E' : 'white';
@@ -106,7 +149,7 @@ export default function ScriptGenerator() {
     modal.style.position = 'absolute';
     modal.style.bottom = '70px';
     modal.style.${position === 'right' ? 'right' : 'left'} = '0';
-    modal.style.width = '300px';
+    modal.style.width = layout === 'modern' ? '280px' : '300px';
     modal.style.backgroundColor = '${bgColor}';
     modal.style.borderRadius = '${theme === 'dark' ? '16px' : '8px'}';
     modal.style.boxShadow = '0 4px 12px rgba(0, 0, 0, ${theme === 'dark' ? '0.5' : '0.15'})';
@@ -124,73 +167,138 @@ export default function ScriptGenerator() {
     companyTitle.style.textAlign = 'center';
     companyTitle.style.color = '${textColor}';
     
-    // Create buttons container
+    // Create buttons container with layout-dependent styling
     var buttonsContainer = document.createElement('div');
-    buttonsContainer.style.display = 'grid';
-    buttonsContainer.style.gridTemplateColumns = '1fr 1fr';
-    buttonsContainer.style.gap = '10px';
     
-    // Create button function
-    function createButton(icon, text, action, color) {
+    // Choose layout for the buttons
+    if (layout === 'modern') {
+      buttonsContainer.style.display = 'grid';
+      buttonsContainer.style.gridTemplateColumns = '1fr 1fr';
+      buttonsContainer.style.gap = '16px';
+      buttonsContainer.style.justifyItems = 'center';
+    } else {
+      buttonsContainer.style.display = 'grid';
+      buttonsContainer.style.gridTemplateColumns = '1fr 1fr';
+      buttonsContainer.style.gap = '10px';
+    }
+    
+    // Create button function with layout-specific styling
+    function createButton(icon, text, action, color, buttonType) {
       var button = document.createElement('button');
-      button.innerHTML = icon + '<span>' + text + '</span>';
-      button.style.display = 'flex';
-      button.style.flexDirection = 'column';
-      button.style.alignItems = 'center';
-      button.style.justifyContent = 'center';
-      button.style.padding = '16px 8px';
-      button.style.backgroundColor = theme === 'dark' ? '#2D2D2D' : color;
-      button.style.color = theme === 'dark' ? '#D4AF37' : 'white';
-      button.style.border = theme === 'dark' ? '1px solid #444444' : 'none';
-      button.style.borderRadius = theme === 'dark' ? '12px' : '6px';
+      
+      if (layout === 'modern') {
+        // Modern circle button
+        button.style.width = '80px';
+        button.style.padding = '0';
+        button.style.display = 'flex';
+        button.style.flexDirection = 'column';
+        button.style.alignItems = 'center';
+        button.style.background = 'none';
+        button.style.border = 'none';
+        button.style.cursor = 'pointer';
+        
+        var iconCircle = document.createElement('div');
+        iconCircle.innerHTML = icon;
+        iconCircle.style.width = '60px';
+        iconCircle.style.height = '60px';
+        iconCircle.style.borderRadius = '50%';
+        iconCircle.style.backgroundColor = buttonColors[buttonType];
+        iconCircle.style.display = 'flex';
+        iconCircle.style.alignItems = 'center';
+        iconCircle.style.justifyContent = 'center';
+        iconCircle.style.marginBottom = '8px';
+        iconCircle.style.color = 'white';
+        
+        var textSpan = document.createElement('span');
+        textSpan.textContent = text;
+        textSpan.style.fontSize = '12px';
+        textSpan.style.color = theme === 'dark' ? '#D4AF37' : '#333';
+        
+        button.appendChild(iconCircle);
+        button.appendChild(textSpan);
+      } else {
+        // Classic button style
+        button.innerHTML = icon + '<span>' + text + '</span>';
+        button.style.display = 'flex';
+        button.style.flexDirection = 'column';
+        button.style.alignItems = 'center';
+        button.style.justifyContent = 'center';
+        button.style.padding = '16px 8px';
+        button.style.backgroundColor = theme === 'dark' ? '#2D2D2D' : color;
+        button.style.color = theme === 'dark' ? '#D4AF37' : 'white';
+        button.style.border = theme === 'dark' ? '1px solid #444444' : 'none';
+        button.style.borderRadius = theme === 'dark' ? '12px' : '6px';
+        button.style.fontWeight = 'bold';
+        button.style.fontSize = '14px';
+        button.style.gap = '8px';
+      }
+      
       button.style.cursor = 'pointer';
-      button.style.fontWeight = 'bold';
-      button.style.fontSize = '14px';
-      button.style.gap = '8px';
       button.addEventListener('click', action);
       return button;
     }
     
-    // Call button
+    // Define icons for each button type
     var callIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>';
-    var callButton = createButton(callIcon, '${buttonLabels.call}', function() {
-      window.location.href = 'tel:${companyPhone}';
-    }, '${primaryColor}');
-    
-    // SMS button
     var smsIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>';
-    var smsButton = createButton(smsIcon, '${buttonLabels.sms}', function() {
-      // Create form for SMS intake
-      var currentModal = document.getElementById('caseflowpro-form-modal');
-      if (currentModal) {
-        currentModal.remove();
-      }
-      
-      var formModal = createFormModal('SMS');
-      document.body.appendChild(formModal);
-      formModal.style.display = 'block';
-    }, '${secondaryColor}');
-    
-    // WhatsApp button
     var whatsappIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>';
-    var whatsappButton = createButton(whatsappIcon, '${buttonLabels.whatsapp}', function() {
+    var chatIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12.01" y2="16"></line><polyline points="12 12 12 8"></polyline></svg>';
+    
+    // Define button actions based on settings
+    function handleCallAction() {
+      if (buttonActions.call === 'phone') {
+        window.location.href = 'tel:${companyPhone}';
+      } else {
+        var currentModal = document.getElementById('caseflowpro-form-modal');
+        if (currentModal) {
+          currentModal.remove();
+        }
+        var formModal = createFormModal('Call');
+        document.body.appendChild(formModal);
+        formModal.style.display = 'block';
+      }
+    }
+    
+    function handleSmsAction() {
+      if (buttonActions.sms === 'sms') {
+        window.location.href = 'sms:${companyPhone}';
+      } else {
+        var currentModal = document.getElementById('caseflowpro-form-modal');
+        if (currentModal) {
+          currentModal.remove();
+        }
+        var formModal = createFormModal('SMS');
+        document.body.appendChild(formModal);
+        formModal.style.display = 'block';
+      }
+    }
+    
+    function handleWhatsappAction() {
       var phoneNumber = '${companyWhatsApp}'.replace(/[^0-9]/g, '');
       window.open('https://wa.me/' + phoneNumber, '_blank');
-    }, '${primaryColor}');
+    }
     
-    // Case Value button
-    var valueIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>';
-    var valueButton = createButton(valueIcon, '${buttonLabels.value}', function() {
-      // Create form for case value
-      var currentModal = document.getElementById('caseflowpro-form-modal');
-      if (currentModal) {
-        currentModal.remove();
+    function handleChatAction() {
+      if (buttonActions.chat === 'chat') {
+        // Here you could open a chat widget if you have one integrated
+        console.log('Opening chat widget');
+        // For example: window.openChatWidget && window.openChatWidget();
+      } else {
+        var currentModal = document.getElementById('caseflowpro-form-modal');
+        if (currentModal) {
+          currentModal.remove();
+        }
+        var formModal = createFormModal('Chat');
+        document.body.appendChild(formModal);
+        formModal.style.display = 'block';
       }
-      
-      var formModal = createFormModal('Case Value');
-      document.body.appendChild(formModal);
-      formModal.style.display = 'block';
-    }, '${secondaryColor}');
+    }
+    
+    // Create the buttons
+    var callButton = createButton(callIcon, '${buttonLabels.call}', handleCallAction, '${primaryColor}', 'call');
+    var smsButton = createButton(smsIcon, '${buttonLabels.sms}', handleSmsAction, '${secondaryColor}', 'sms');
+    var whatsappButton = createButton(whatsappIcon, '${buttonLabels.whatsapp}', handleWhatsappAction, '${primaryColor}', 'whatsapp');
+    var chatButton = createButton(chatIcon, '${buttonLabels.chat}', handleChatAction, '${secondaryColor}', 'chat');
     
     // Create form modal function
     function createFormModal(formType) {
@@ -432,7 +540,7 @@ export default function ScriptGenerator() {
     buttonsContainer.appendChild(callButton);
     buttonsContainer.appendChild(smsButton);
     buttonsContainer.appendChild(whatsappButton);
-    buttonsContainer.appendChild(valueButton);
+    buttonsContainer.appendChild(chatButton);
     
     // Assemble modal
     modal.appendChild(companyTitle);
@@ -633,6 +741,21 @@ export default function ScriptGenerator() {
                 <option value="dark">Dark Gold</option>
               </select>
             </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Widget Layout
+              </label>
+              <select
+                name="layout"
+                value={widgetSettings.layout}
+                onChange={handleInputChange}
+                className="input-field w-full"
+              >
+                <option value="classic">Classic Grid</option>
+                <option value="modern">Modern Circles</option>
+              </select>
+            </div>
           </div>
           
           <h3 className="text-md font-medium mt-6 mb-3">Button Labels</h3>
@@ -678,15 +801,79 @@ export default function ScriptGenerator() {
             
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Case Value Button Label
+                Live Chat Button Label
               </label>
               <input
                 type="text"
-                name="buttonLabels.value"
-                value={widgetSettings.buttonLabels.value}
+                name="buttonLabels.chat"
+                value={widgetSettings.buttonLabels.chat}
                 onChange={handleInputChange}
                 className="input-field w-full"
               />
+            </div>
+          </div>
+
+          <h3 className="text-md font-medium mt-6 mb-3">Button Actions</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Call Button Action
+              </label>
+              <select
+                name="buttonActions.call"
+                value={widgetSettings.buttonActions.call}
+                onChange={handleInputChange}
+                className="input-field w-full"
+              >
+                <option value="phone">Direct Call</option>
+                <option value="form">Show Form</option>
+              </select>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                SMS Button Action
+              </label>
+              <select
+                name="buttonActions.sms"
+                value={widgetSettings.buttonActions.sms}
+                onChange={handleInputChange}
+                className="input-field w-full"
+              >
+                <option value="sms">Open SMS App</option>
+                <option value="form">Show Form</option>
+              </select>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                WhatsApp Button Action
+              </label>
+              <select
+                name="buttonActions.whatsapp"
+                value={widgetSettings.buttonActions.whatsapp}
+                onChange={handleInputChange}
+                className="input-field w-full"
+                disabled
+              >
+                <option value="whatsapp">Open WhatsApp</option>
+              </select>
+              <p className="text-xs text-gray-500 mt-1">WhatsApp always opens the WhatsApp app or web interface</p>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Live Chat Button Action
+              </label>
+              <select
+                name="buttonActions.chat"
+                value={widgetSettings.buttonActions.chat}
+                onChange={handleInputChange}
+                className="input-field w-full"
+              >
+                <option value="chat">Open Live Chat</option>
+                <option value="form">Show Form</option>
+              </select>
             </div>
           </div>
         </div>
