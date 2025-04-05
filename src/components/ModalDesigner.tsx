@@ -94,10 +94,10 @@ export default function ModalDesigner({ onSave, initialSettings = {} }: ModalDes
           <button
             type="button"
             onClick={openPreview}
-            className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+            className="inline-flex items-center px-3 py-2 border border-transparent shadow-sm text-sm leading-4 font-medium rounded-md text-white bg-secondary-600 hover:bg-secondary-700"
           >
             <EyeIcon className="mr-2 h-4 w-4" />
-            Preview
+            Live Preview
           </button>
           <button
             type="button"
