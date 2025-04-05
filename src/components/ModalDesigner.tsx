@@ -86,6 +86,12 @@ export default function ModalDesigner({ onSave, initialSettings = {} }: ModalDes
     setPreviewOpen(true)
   }
   
+  const previewDescription = `
+    This is a live preview of your widget design. 
+    Any changes you make in the form will be reflected here in real-time.
+    Click outside to close.
+  `.trim()
+
   return (
     <div className="bg-white rounded-lg shadow p-6">
       <div className="flex justify-between items-center mb-6">
@@ -299,26 +305,30 @@ export default function ModalDesigner({ onSave, initialSettings = {} }: ModalDes
       <Modal
         isOpen={previewOpen}
         onClose={() => setPreviewOpen(false)}
-        title={currentValues.title}
-        description="This is a preview of your modal"
-        theme={currentValues.theme}
-        size={currentValues.size}
-        position={currentValues.position}
-        showCloseButton={currentValues.showCloseButton}
-        animation={currentValues.animation}
+        title={currentValues.title || defaultSettings.title}
+        description={previewDescription}
+        theme={currentValues.theme || defaultSettings.theme}
+        size={currentValues.size || defaultSettings.size}
+        position={currentValues.position || defaultSettings.position}
+        showCloseButton={currentValues.showCloseButton !== undefined ? currentValues.showCloseButton : defaultSettings.showCloseButton}
+        animation={currentValues.animation || defaultSettings.animation}
       >
         <div className="space-y-6">
-          <p className="text-sm text-gray-500">{currentValues.message}</p>
+          <p className="text-sm text-gray-500">{currentValues.message || defaultSettings.message}</p>
           
           <div className="pt-4">
-            <div className="flex justify-end">
-              <button
-                type="button"
-                className="inline-flex justify-center rounded-md border border-transparent bg-primary-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
-                style={{ backgroundColor: currentValues.theme === 'branded' ? currentValues.primaryColor : undefined }}
-              >
-                {currentValues.buttonLabel}
-              </button>
+            <div className="flex flex-col space-y-2">
+              <div className="text-xs text-gray-400 italic">Example form fields would appear here</div>
+              
+              <div className="flex justify-end">
+                <button
+                  type="button"
+                  className="inline-flex justify-center rounded-md border border-transparent bg-primary-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
+                  style={{ backgroundColor: currentValues.theme === 'branded' ? (currentValues.primaryColor || defaultSettings.primaryColor) : undefined }}
+                >
+                  {currentValues.buttonLabel || defaultSettings.buttonLabel}
+                </button>
+              </div>
             </div>
           </div>
         </div>

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
-import { ClipboardIcon } from '@heroicons/react/24/outline'
+import { ClipboardIcon, CheckIcon } from '@heroicons/react/24/outline'
 import DashboardLayout from '@/components/DashboardLayout'
 import { useUser } from '@/lib/hooks'
 
@@ -26,6 +26,8 @@ export default function ScriptGenerator() {
   })
 
   const [copied, setCopied] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
+  const [saveSuccess, setSaveSuccess] = useState(false)
 
   // Update company info when user data is loaded
   useEffect(() => {
@@ -463,6 +465,37 @@ export default function ScriptGenerator() {
     setTimeout(() => setCopied(false), 2000)
   }
 
+  const handleSaveSettings = async () => {
+    setIsSaving(true)
+    setSaveSuccess(false)
+    
+    try {
+      // Here we would typically call an API endpoint to save settings
+      // For now, we'll just simulate a successful save with a delay
+      await new Promise(resolve => setTimeout(resolve, 800))
+      
+      // If you have an actual API endpoint, you would call it like this:
+      // const response = await fetch('/api/save-widget-settings', {
+      //   method: 'POST',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify(widgetSettings)
+      // })
+      
+      // If successful
+      setSaveSuccess(true)
+      
+      // Reset success message after 3 seconds
+      setTimeout(() => {
+        setSaveSuccess(false)
+      }, 3000)
+    } catch (error) {
+      console.error('Error saving settings:', error)
+      // You could add error handling UI here
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
   if (loading) {
     return <DashboardLayout>Loading...</DashboardLayout>
   }
@@ -658,6 +691,32 @@ export default function ScriptGenerator() {
               <li>Make sure to configure your CRM integration in the settings page</li>
             </ol>
           </div>
+        </div>
+        
+        <div className="mt-6 flex justify-end">
+          <button
+            type="button"
+            onClick={handleSaveSettings}
+            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+            disabled={isSaving}
+          >
+            {isSaving ? (
+              <>
+                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Saving...
+              </>
+            ) : saveSuccess ? (
+              <>
+                <CheckIcon className="mr-2 h-4 w-4" />
+                Saved!
+              </>
+            ) : (
+              'Save Settings'
+            )}
+          </button>
         </div>
       </div>
     </DashboardLayout>
