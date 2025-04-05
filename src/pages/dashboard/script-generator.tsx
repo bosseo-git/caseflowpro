@@ -20,6 +20,18 @@ export default function ScriptGenerator() {
     theme: 'light',
     layout: 'classic',
     startMinimized: true,
+    analytics: {
+      enabled: true,
+      trackEvents: true,
+      trackImpressions: true,
+      trackConversions: true,
+      cookieConsent: true,
+      anonymizeIP: false,
+      googleAnalytics: {
+        enabled: false,
+        trackingId: ''
+      }
+    },
     buttonLabels: {
       call: 'Call Now',
       sms: 'SMS Us',
@@ -107,7 +119,8 @@ export default function ScriptGenerator() {
       buttonColors,
       theme, 
       layout,
-      startMinimized
+      startMinimized,
+      analytics
     } = widgetSettings
     
     // Calculate colors based on theme
@@ -123,6 +136,54 @@ export default function ScriptGenerator() {
 <!-- CaseFlowPro Widget -->
 <script>
   (function() {
+    // CaseFlowPro Analytics Object
+    window.caseFlowProAnalytics = {
+      widgetId: '${user?.id || 'unknown'}',
+      events: [],
+      trackEvent: function(eventName, eventData) {
+        if (!${analytics.enabled}) return;
+        
+        const event = {
+          eventName,
+          eventData,
+          timestamp: new Date().toISOString(),
+          page: window.location.href,
+          referrer: document.referrer,
+          sessionId: this.getSessionId()
+        };
+        
+        this.events.push(event);
+        this.sendEvent(event);
+        
+        ${analytics.googleAnalytics.enabled ? `
+        // Send to Google Analytics if configured
+        if (typeof gtag !== 'undefined') {
+          gtag('event', eventName, eventData);
+        }
+        ` : ''}
+      },
+      getSessionId: function() {
+        let sessionId = sessionStorage.getItem('caseFlowProSessionId');
+        if (!sessionId) {
+          sessionId = 'session_' + Math.random().toString(36).substring(2, 15);
+          sessionStorage.setItem('caseFlowProSessionId', sessionId);
+        }
+        return sessionId;
+      },
+      sendEvent: function(event) {
+        // Send analytics data to the server
+        fetch('${process.env.NEXT_PUBLIC_API_URL || ''}/api/analytics', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(event),
+          // Don't wait for response to avoid blocking
+          keepalive: true
+        }).catch(error => console.error('Analytics error:', error));
+      }
+    };
+    
     // Create widget container
     var widget = document.createElement('div');
     widget.id = 'caseflowpro-widget';
@@ -131,6 +192,15 @@ export default function ScriptGenerator() {
     widget.style.bottom = '20px';
     widget.style.zIndex = '9999';
     widget.style.fontFamily = 'Arial, sans-serif';
+    
+    // Track widget impression
+    if (${analytics.trackImpressions}) {
+      window.caseFlowProAnalytics.trackEvent('widget_impression', {
+        widgetPosition: '${position}',
+        widgetTheme: '${theme}',
+        widgetLayout: '${layout}'
+      });
+    }
     
     // Create widget button (for minimized state)
     var widgetButton = document.createElement('button');
@@ -148,6 +218,17 @@ export default function ScriptGenerator() {
     widgetButton.style.alignItems = 'center';
     widgetButton.style.justifyContent = 'center';
     widgetButton.style.transition = 'all 0.3s ease';
+    
+    // Add analytics to button clicks
+    widgetButton.addEventListener('click', function() {
+      if (${analytics.trackEvents}) {
+        window.caseFlowProAnalytics.trackEvent('widget_open', {
+          widgetPosition: '${position}',
+          widgetTheme: '${theme}',
+          widgetLayout: '${layout}'
+        });
+      }
+    });
     
     // Create widget modal
     var modal = document.createElement('div');
@@ -198,6 +279,13 @@ export default function ScriptGenerator() {
     // Add header elements
     modalHeader.appendChild(companyTitle);
     modalHeader.appendChild(minimizeButton);
+    
+    // Add analytics to minimize button
+    minimizeButton.addEventListener('click', function() {
+      if (${analytics.trackEvents}) {
+        window.caseFlowProAnalytics.trackEvent('widget_minimize', {});
+      }
+    });
     
     // Create content container for the modal
     var modalContent = document.createElement('div');
@@ -285,6 +373,12 @@ export default function ScriptGenerator() {
     
     // Define button actions based on settings
     function handleCallAction() {
+      if (${analytics.trackEvents}) {
+        window.caseFlowProAnalytics.trackEvent('call_button_click', {
+          actionType: '${buttonActions.call}'
+        });
+      }
+      
       if (buttonActions.call === 'phone') {
         window.location.href = 'tel:${companyPhone}';
       } else {
@@ -299,6 +393,12 @@ export default function ScriptGenerator() {
     }
     
     function handleSmsAction() {
+      if (${analytics.trackEvents}) {
+        window.caseFlowProAnalytics.trackEvent('sms_button_click', {
+          actionType: '${buttonActions.sms}'
+        });
+      }
+      
       if (buttonActions.sms === 'sms') {
         window.location.href = 'sms:${companyPhone}';
       } else {
@@ -313,11 +413,21 @@ export default function ScriptGenerator() {
     }
     
     function handleWhatsappAction() {
+      if (${analytics.trackEvents}) {
+        window.caseFlowProAnalytics.trackEvent('whatsapp_button_click', {});
+      }
+      
       var phoneNumber = '${companyWhatsApp}'.replace(/[^0-9]/g, '');
       window.open('https://wa.me/' + phoneNumber, '_blank');
     }
     
     function handleChatAction() {
+      if (${analytics.trackEvents}) {
+        window.caseFlowProAnalytics.trackEvent('chat_button_click', {
+          actionType: '${buttonActions.chat}'
+        });
+      }
+      
       if (buttonActions.chat === 'chat') {
         // Here you could open a chat widget if you have one integrated
         console.log('Opening chat widget');
@@ -419,67 +529,76 @@ export default function ScriptGenerator() {
       
       form.appendChild(submitButton);
       
-      // Submit form event
-      form.addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        // Gather form data
-        var formData = {
-          type: formType,
-          name: form.elements.name.value,
-          phone: form.elements.phone.value
-        };
-        
-        if (formType === 'Case Value') {
-          formData.caseType = form.elements.caseType.value;
-          formData.caseDetails = form.elements.caseDetails.value;
-        }
-        
-        // Send data to CRM
-        sendToCRM(formData);
-        
-        // Replace form with thank you message
-        formContainer.innerHTML = '';
-        var thankYou = document.createElement('div');
-        thankYou.style.textAlign = 'center';
-        thankYou.style.padding = '20px';
-        
-        var thankYouTitle = document.createElement('h3');
-        thankYouTitle.textContent = 'Thank You!';
-        thankYouTitle.style.fontSize = '24px';
-        thankYouTitle.style.fontWeight = 'bold';
-        thankYouTitle.style.marginBottom = '16px';
-        
-        var thankYouMessage = document.createElement('p');
-        thankYouMessage.textContent = formType === 'SMS' ? 
-          'We\'ll send you a text message shortly.' : 
-          'We\'ll review your case details and get back to you soon with an estimate.';
-        thankYouMessage.style.fontSize = '16px';
-        thankYouMessage.style.marginBottom = '20px';
-        
-        var closeThankYouButton = document.createElement('button');
-        closeThankYouButton.textContent = 'Close';
-        closeThankYouButton.style.padding = '10px 20px';
-        closeThankYouButton.style.backgroundColor = '${primaryColor}';
-        closeThankYouButton.style.color = 'white';
-        closeThankYouButton.style.border = 'none';
-        closeThankYouButton.style.borderRadius = '6px';
-        closeThankYouButton.style.cursor = 'pointer';
-        closeThankYouButton.addEventListener('click', function() {
-          formModal.remove();
+      // Track form submission
+      if (${analytics.trackConversions}) {
+        form.addEventListener('submit', function(e) {
+          e.preventDefault();
+          
+          // Gather form data
+          var formData = {
+            type: formType,
+            name: form.elements.name.value,
+            phone: form.elements.phone.value
+          };
+          
+          if (formType === 'Case Value') {
+            formData.caseType = form.elements.caseType.value;
+            formData.caseDetails = form.elements.caseDetails.value;
+          }
+          
+          // Track form submission
+          if (${analytics.trackConversions}) {
+            window.caseFlowProAnalytics.trackEvent('form_submit', {
+              formType: formType
+            });
+          }
+          
+          // Send data to CRM
+          sendToCRM(formData);
+          
+          // Replace form with thank you message
+          formContainer.innerHTML = '';
+          var thankYou = document.createElement('div');
+          thankYou.style.textAlign = 'center';
+          thankYou.style.padding = '20px';
+          
+          var thankYouTitle = document.createElement('h3');
+          thankYouTitle.textContent = 'Thank You!';
+          thankYouTitle.style.fontSize = '24px';
+          thankYouTitle.style.fontWeight = 'bold';
+          thankYouTitle.style.marginBottom = '16px';
+          
+          var thankYouMessage = document.createElement('p');
+          thankYouMessage.textContent = formType === 'SMS' ? 
+            'We\'ll send you a text message shortly.' : 
+            'We\'ll review your case details and get back to you soon with an estimate.';
+          thankYouMessage.style.fontSize = '16px';
+          thankYouMessage.style.marginBottom = '20px';
+          
+          var closeThankYouButton = document.createElement('button');
+          closeThankYouButton.textContent = 'Close';
+          closeThankYouButton.style.padding = '10px 20px';
+          closeThankYouButton.style.backgroundColor = '${primaryColor}';
+          closeThankYouButton.style.color = 'white';
+          closeThankYouButton.style.border = 'none';
+          closeThankYouButton.style.borderRadius = '6px';
+          closeThankYouButton.style.cursor = 'pointer';
+          closeThankYouButton.addEventListener('click', function() {
+            formModal.remove();
+          });
+          
+          thankYou.appendChild(thankYouTitle);
+          thankYou.appendChild(thankYouMessage);
+          thankYou.appendChild(closeThankYouButton);
+          
+          formContainer.appendChild(thankYou);
+          
+          // Close modal after 5 seconds
+          setTimeout(function() {
+            formModal.remove();
+          }, 5000);
         });
-        
-        thankYou.appendChild(thankYouTitle);
-        thankYou.appendChild(thankYouMessage);
-        thankYou.appendChild(closeThankYouButton);
-        
-        formContainer.appendChild(thankYou);
-        
-        // Close modal after 5 seconds
-        setTimeout(function() {
-          formModal.remove();
-        }, 5000);
-      });
+      }
       
       formContainer.appendChild(closeButton);
       formContainer.appendChild(formTitle);
@@ -935,6 +1054,182 @@ export default function ScriptGenerator() {
               </select>
             </div>
           </div>
+        </div>
+        
+        <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+          <h2 className="text-lg font-medium mb-4">Analytics Settings</h2>
+          
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                id="analytics-enabled"
+                checked={widgetSettings.analytics.enabled}
+                onChange={(e) => {
+                  setWidgetSettings(prev => ({
+                    ...prev,
+                    analytics: {
+                      ...prev.analytics,
+                      enabled: e.target.checked
+                    }
+                  }));
+                }}
+                className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+              />
+              <label htmlFor="analytics-enabled" className="ml-2 block text-sm text-gray-700">
+                Enable Analytics
+              </label>
+            </div>
+          </div>
+          
+          {widgetSettings.analytics.enabled && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="flex items-center">
+                  <input
+                    type="checkbox"
+                    id="track-events"
+                    checked={widgetSettings.analytics.trackEvents}
+                    onChange={(e) => {
+                      setWidgetSettings(prev => ({
+                        ...prev,
+                        analytics: {
+                          ...prev.analytics,
+                          trackEvents: e.target.checked
+                        }
+                      }));
+                    }}
+                    className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+                  />
+                  <label htmlFor="track-events" className="ml-2 block text-sm text-gray-700">
+                    Track Button Clicks
+                  </label>
+                </div>
+                
+                <div className="flex items-center">
+                  <input
+                    type="checkbox"
+                    id="track-impressions"
+                    checked={widgetSettings.analytics.trackImpressions}
+                    onChange={(e) => {
+                      setWidgetSettings(prev => ({
+                        ...prev,
+                        analytics: {
+                          ...prev.analytics,
+                          trackImpressions: e.target.checked
+                        }
+                      }));
+                    }}
+                    className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+                  />
+                  <label htmlFor="track-impressions" className="ml-2 block text-sm text-gray-700">
+                    Track Widget Impressions
+                  </label>
+                </div>
+                
+                <div className="flex items-center">
+                  <input
+                    type="checkbox"
+                    id="track-conversions"
+                    checked={widgetSettings.analytics.trackConversions}
+                    onChange={(e) => {
+                      setWidgetSettings(prev => ({
+                        ...prev,
+                        analytics: {
+                          ...prev.analytics,
+                          trackConversions: e.target.checked
+                        }
+                      }));
+                    }}
+                    className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+                  />
+                  <label htmlFor="track-conversions" className="ml-2 block text-sm text-gray-700">
+                    Track Form Submissions
+                  </label>
+                </div>
+                
+                <div className="flex items-center">
+                  <input
+                    type="checkbox"
+                    id="cookie-consent"
+                    checked={widgetSettings.analytics.cookieConsent}
+                    onChange={(e) => {
+                      setWidgetSettings(prev => ({
+                        ...prev,
+                        analytics: {
+                          ...prev.analytics,
+                          cookieConsent: e.target.checked
+                        }
+                      }));
+                    }}
+                    className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+                  />
+                  <label htmlFor="cookie-consent" className="ml-2 block text-sm text-gray-700">
+                    Show Cookie Consent
+                  </label>
+                </div>
+              </div>
+              
+              <div className="mt-4 border-t border-gray-200 pt-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    <input
+                      type="checkbox"
+                      id="google-analytics"
+                      checked={widgetSettings.analytics.googleAnalytics.enabled}
+                      onChange={(e) => {
+                        setWidgetSettings(prev => ({
+                          ...prev,
+                          analytics: {
+                            ...prev.analytics,
+                            googleAnalytics: {
+                              ...prev.analytics.googleAnalytics,
+                              enabled: e.target.checked
+                            }
+                          }
+                        }));
+                      }}
+                      className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+                    />
+                    <label htmlFor="google-analytics" className="ml-2 block text-sm text-gray-700">
+                      Send Events to Google Analytics
+                    </label>
+                  </div>
+                </div>
+                
+                {widgetSettings.analytics.googleAnalytics.enabled && (
+                  <div className="mt-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Google Analytics Tracking ID
+                    </label>
+                    <input
+                      type="text"
+                      value={widgetSettings.analytics.googleAnalytics.trackingId}
+                      onChange={(e) => {
+                        setWidgetSettings(prev => ({
+                          ...prev,
+                          analytics: {
+                            ...prev.analytics,
+                            googleAnalytics: {
+                              ...prev.analytics.googleAnalytics,
+                              trackingId: e.target.value
+                            }
+                          }
+                        }));
+                      }}
+                      placeholder="UA-XXXXXXXXX-X or G-XXXXXXXXXX"
+                      className="input-field w-full"
+                    />
+                  </div>
+                )}
+              </div>
+              
+              <div className="mt-2 text-xs text-gray-500">
+                Analytics data will help you understand how visitors interact with your widget.
+                View detailed reports in the <a href="/dashboard/analytics" className="text-primary-600 hover:text-primary-500">Analytics Dashboard</a>.
+              </div>
+            </div>
+          )}
         </div>
         
         <div className="bg-white rounded-lg shadow-md p-6">

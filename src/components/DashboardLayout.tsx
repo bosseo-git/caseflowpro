@@ -15,7 +15,11 @@ import {
   XMarkIcon,
   CreditCardIcon,
   CommandLineIcon,
-  ArrowRightOnRectangleIcon
+  ArrowRightOnRectangleIcon,
+  CodeIcon,
+  PencilIcon,
+  TemplateIcon,
+  PuzzlePieceIcon
 } from '@heroicons/react/24/outline'
 
 // Update the type to match the actual icon component type
@@ -39,6 +43,10 @@ const navigation: NavItem[] = [
   { name: 'Settings', href: '/dashboard/settings', icon: CogIcon, current: false },
   { name: 'Widget Generator', href: '/dashboard/script-generator', icon: CommandLineIcon, current: false },
   { name: 'Subscription', href: '/dashboard/subscription', icon: CreditCardIcon, current: false },
+  { name: 'Script Generator', href: '/dashboard/script-generator', icon: CodeIcon, current: false },
+  { name: 'Widget Designer', href: '/dashboard/widget-designer', icon: PencilIcon, current: false },
+  { name: 'Templates', href: '/dashboard/templates', icon: TemplateIcon, current: false },
+  { name: 'Integrations', href: '/dashboard/integrations', icon: PuzzlePieceIcon, current: false },
 ]
 
 type DashboardLayoutProps = {
@@ -72,6 +80,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     { name: 'Integration Settings', href: '/dashboard/settings', icon: CogIcon, current: currentPath === '/dashboard/settings' },
     { name: 'Subscription', href: '/dashboard/subscription', icon: CreditCardIcon, current: currentPath === '/dashboard/subscription' },
     { name: 'Analytics', href: '/dashboard/analytics', icon: ChartBarIcon, current: currentPath === '/dashboard/analytics' },
+    { name: 'Leads', href: '/dashboard/leads', icon: UserGroupIcon, current: currentPath === '/dashboard/leads' },
+    { name: 'Templates', href: '/dashboard/templates', icon: TemplateIcon, current: currentPath === '/dashboard/templates' },
+    { name: 'Integrations', href: '/dashboard/integrations', icon: PuzzlePieceIcon, current: currentPath === '/dashboard/integrations' },
   ]
   
   return (
