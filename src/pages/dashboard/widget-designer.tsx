@@ -105,7 +105,7 @@ export default function WidgetDesigner() {
         <title>Widget Designer | CaseFlowPro</title>
         <meta
           name="description"
-          content="Design and customize your client intake widget"
+          content="Design and customize your client intake widget appearance and behavior"
         />
       </Head>
 

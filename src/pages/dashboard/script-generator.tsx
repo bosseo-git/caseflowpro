@@ -470,7 +470,7 @@ export default function ScriptGenerator() {
   return (
     <DashboardLayout>
       <div className="container mx-auto px-4 py-8">
-        <h1 className="text-2xl font-semibold mb-6">Website Widget Generator</h1>
+        <h1 className="text-2xl font-semibold mb-6">Script Generator</h1>
         
         <div className="bg-white rounded-lg shadow-md p-6 mb-8">
           <h2 className="text-lg font-medium mb-4">Widget Settings</h2>

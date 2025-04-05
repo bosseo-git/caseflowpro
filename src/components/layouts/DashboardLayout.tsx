@@ -13,6 +13,7 @@ import {
   ArrowLeftOnRectangleIcon,
   Bars3Icon,
   XMarkIcon,
+  CommandLineIcon,
 } from '@heroicons/react/24/outline'
 
 type DashboardLayoutProps = {
@@ -28,10 +29,15 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
     { name: 'Analytics', href: '/dashboard/analytics', icon: ChartBarIcon },
     { 
-      name: 'Widget Generator', 
+      name: 'Widget Designer', 
       href: '/dashboard/widget-designer', 
       icon: DocumentTextIcon,
       badge: 'New'
+    },
+    {
+      name: 'Script Generator',
+      href: '/dashboard/script-generator',
+      icon: CommandLineIcon
     },
     { name: 'Clients', href: '/dashboard/clients', icon: UserGroupIcon },
     { name: 'Integration Settings', href: '/dashboard/settings', icon: Cog6ToothIcon },
