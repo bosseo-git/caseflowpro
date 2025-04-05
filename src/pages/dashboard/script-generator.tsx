@@ -17,6 +17,7 @@ export default function ScriptGenerator() {
     companyName: '',
     companyPhone: '',
     companyWhatsApp: '',
+    theme: 'light',
     buttonLabels: {
       call: 'Call Now',
       sms: 'SMS Us',
@@ -62,7 +63,14 @@ export default function ScriptGenerator() {
   }
 
   const generateScript = () => {
-    const { primaryColor, secondaryColor, position, companyName, companyPhone, companyWhatsApp, buttonLabels } = widgetSettings
+    const { primaryColor, secondaryColor, position, companyName, companyPhone, companyWhatsApp, buttonLabels, theme } = widgetSettings
+    
+    // Calculate colors based on theme
+    const bgColor = theme === 'dark' ? '#1E1E1E' : 'white';
+    const iconColor = theme === 'dark' ? '#D4AF37' : primaryColor; // Gold color for dark theme
+    const textColor = theme === 'dark' ? '#D4AF37' : '#333333';
+    const buttonBgColor = theme === 'dark' ? '#2D2D2D' : primaryColor;
+    const buttonTextColor = theme === 'dark' ? '#D4AF37' : 'white';
     
     return `
 <!-- CaseFlowPro Widget -->
@@ -82,10 +90,10 @@ export default function ScriptGenerator() {
     widgetButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>';
     widgetButton.style.width = '60px';
     widgetButton.style.height = '60px';
-    widgetButton.style.borderRadius = '50%';
-    widgetButton.style.backgroundColor = '${primaryColor}';
-    widgetButton.style.color = 'white';
-    widgetButton.style.border = 'none';
+    widgetButton.style.borderRadius = '${theme === 'dark' ? '12px' : '50%'}';
+    widgetButton.style.backgroundColor = '${theme === 'dark' ? '#1E1E1E' : primaryColor}';
+    widgetButton.style.color = '${theme === 'dark' ? '#D4AF37' : 'white'}';
+    widgetButton.style.border = '${theme === 'dark' ? '1px solid #333333' : 'none'}';
     widgetButton.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.2)';
     widgetButton.style.cursor = 'pointer';
     widgetButton.style.display = 'flex';
@@ -99,9 +107,9 @@ export default function ScriptGenerator() {
     modal.style.bottom = '70px';
     modal.style.${position === 'right' ? 'right' : 'left'} = '0';
     modal.style.width = '300px';
-    modal.style.backgroundColor = 'white';
-    modal.style.borderRadius = '8px';
-    modal.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)';
+    modal.style.backgroundColor = '${bgColor}';
+    modal.style.borderRadius = '${theme === 'dark' ? '16px' : '8px'}';
+    modal.style.boxShadow = '0 4px 12px rgba(0, 0, 0, ${theme === 'dark' ? '0.5' : '0.15'})';
     modal.style.padding = '16px';
     modal.style.display = 'none';
     modal.style.flexDirection = 'column';
@@ -114,6 +122,7 @@ export default function ScriptGenerator() {
     companyTitle.style.fontSize = '18px';
     companyTitle.style.fontWeight = 'bold';
     companyTitle.style.textAlign = 'center';
+    companyTitle.style.color = '${textColor}';
     
     // Create buttons container
     var buttonsContainer = document.createElement('div');
@@ -130,10 +139,10 @@ export default function ScriptGenerator() {
       button.style.alignItems = 'center';
       button.style.justifyContent = 'center';
       button.style.padding = '16px 8px';
-      button.style.backgroundColor = color;
-      button.style.color = 'white';
-      button.style.border = 'none';
-      button.style.borderRadius = '6px';
+      button.style.backgroundColor = theme === 'dark' ? '#2D2D2D' : color;
+      button.style.color = theme === 'dark' ? '#D4AF37' : 'white';
+      button.style.border = theme === 'dark' ? '1px solid #444444' : 'none';
+      button.style.borderRadius = theme === 'dark' ? '12px' : '6px';
       button.style.cursor = 'pointer';
       button.style.fontWeight = 'bold';
       button.style.fontSize = '14px';
@@ -608,6 +617,21 @@ export default function ScriptGenerator() {
                   className="input-field flex-1"
                 />
               </div>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Widget Theme
+              </label>
+              <select
+                name="theme"
+                value={widgetSettings.theme}
+                onChange={handleInputChange}
+                className="input-field w-full"
+              >
+                <option value="light">Light</option>
+                <option value="dark">Dark Gold</option>
+              </select>
             </div>
           </div>
           
