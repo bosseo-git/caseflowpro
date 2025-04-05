@@ -19,6 +19,7 @@ export default function ScriptGenerator() {
     companyWhatsApp: '',
     theme: 'light',
     layout: 'classic',
+    startMinimized: true,
     buttonLabels: {
       call: 'Call Now',
       sms: 'SMS Us',
@@ -105,7 +106,8 @@ export default function ScriptGenerator() {
       buttonActions,
       buttonColors,
       theme, 
-      layout 
+      layout,
+      startMinimized
     } = widgetSettings
     
     // Calculate colors based on theme
@@ -114,6 +116,8 @@ export default function ScriptGenerator() {
     const textColor = theme === 'dark' ? '#D4AF37' : '#333333';
     const buttonBgColor = theme === 'dark' ? '#2D2D2D' : primaryColor;
     const buttonTextColor = theme === 'dark' ? '#D4AF37' : 'white';
+    const headerBgColor = theme === 'dark' ? '#333333' : primaryColor;
+    const headerTextColor = theme === 'dark' ? '#D4AF37' : 'white';
     
     return `
 <!-- CaseFlowPro Widget -->
@@ -126,8 +130,9 @@ export default function ScriptGenerator() {
     widget.style.${position === 'right' ? 'right' : 'left'} = '20px';
     widget.style.bottom = '20px';
     widget.style.zIndex = '9999';
+    widget.style.fontFamily = 'Arial, sans-serif';
     
-    // Create widget button
+    // Create widget button (for minimized state)
     var widgetButton = document.createElement('button');
     widgetButton.id = 'caseflowpro-toggle';
     widgetButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>';
@@ -139,33 +144,67 @@ export default function ScriptGenerator() {
     widgetButton.style.border = '${theme === 'dark' ? '1px solid #333333' : 'none'}';
     widgetButton.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.2)';
     widgetButton.style.cursor = 'pointer';
-    widgetButton.style.display = 'flex';
+    widgetButton.style.display = '${startMinimized ? 'flex' : 'none'}';
     widgetButton.style.alignItems = 'center';
     widgetButton.style.justifyContent = 'center';
+    widgetButton.style.transition = 'all 0.3s ease';
     
     // Create widget modal
     var modal = document.createElement('div');
     modal.id = 'caseflowpro-modal';
-    modal.style.position = 'absolute';
-    modal.style.bottom = '70px';
-    modal.style.${position === 'right' ? 'right' : 'left'} = '0';
+    modal.style.position = 'relative';
     modal.style.width = layout === 'modern' ? '280px' : '300px';
     modal.style.backgroundColor = '${bgColor}';
     modal.style.borderRadius = '${theme === 'dark' ? '16px' : '8px'}';
     modal.style.boxShadow = '0 4px 12px rgba(0, 0, 0, ${theme === 'dark' ? '0.5' : '0.15'})';
-    modal.style.padding = '16px';
-    modal.style.display = 'none';
+    modal.style.overflow = 'hidden';
+    modal.style.display = '${startMinimized ? 'none' : 'flex'}';
     modal.style.flexDirection = 'column';
-    modal.style.gap = '12px';
+    modal.style.transition = 'all 0.3s ease';
     
-    // Add company name to modal
+    // Create header for the modal
+    var modalHeader = document.createElement('div');
+    modalHeader.style.padding = '12px 16px';
+    modalHeader.style.backgroundColor = '${headerBgColor}';
+    modalHeader.style.color = '${headerTextColor}';
+    modalHeader.style.display = 'flex';
+    modalHeader.style.justifyContent = 'space-between';
+    modalHeader.style.alignItems = 'center';
+    modalHeader.style.borderTopLeftRadius = '${theme === 'dark' ? '16px' : '8px'}';
+    modalHeader.style.borderTopRightRadius = '${theme === 'dark' ? '16px' : '8px'}';
+    
+    // Add company name to header
     var companyTitle = document.createElement('h3');
     companyTitle.textContent = '${companyName || 'Contact Us'}';
-    companyTitle.style.margin = '0 0 12px 0';
-    companyTitle.style.fontSize = '18px';
+    companyTitle.style.margin = '0';
+    companyTitle.style.fontSize = '16px';
     companyTitle.style.fontWeight = 'bold';
-    companyTitle.style.textAlign = 'center';
-    companyTitle.style.color = '${textColor}';
+    
+    // Add minimize button to header
+    var minimizeButton = document.createElement('button');
+    minimizeButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg>';
+    minimizeButton.style.background = 'none';
+    minimizeButton.style.border = 'none';
+    minimizeButton.style.color = 'inherit';
+    minimizeButton.style.cursor = 'pointer';
+    minimizeButton.style.padding = '0';
+    minimizeButton.style.display = 'flex';
+    minimizeButton.style.alignItems = 'center';
+    minimizeButton.style.justifyContent = 'center';
+    minimizeButton.style.width = '24px';
+    minimizeButton.style.height = '24px';
+    minimizeButton.title = 'Minimize';
+    
+    // Add header elements
+    modalHeader.appendChild(companyTitle);
+    modalHeader.appendChild(minimizeButton);
+    
+    // Create content container for the modal
+    var modalContent = document.createElement('div');
+    modalContent.style.padding = '16px';
+    modalContent.style.display = 'flex';
+    modalContent.style.flexDirection = 'column';
+    modalContent.style.gap = '12px';
     
     // Create buttons container with layout-dependent styling
     var buttonsContainer = document.createElement('div');
@@ -543,28 +582,27 @@ export default function ScriptGenerator() {
     buttonsContainer.appendChild(chatButton);
     
     // Assemble modal
-    modal.appendChild(companyTitle);
-    modal.appendChild(buttonsContainer);
+    modalContent.appendChild(buttonsContainer);
+    modal.appendChild(modalHeader);
+    modal.appendChild(modalContent);
     
     // Assemble widget
     widget.appendChild(modal);
     widget.appendChild(widgetButton);
     
     // Add toggle functionality
-    widgetButton.addEventListener('click', function() {
-      if (modal.style.display === 'none') {
-        modal.style.display = 'flex';
-      } else {
-        modal.style.display = 'none';
-      }
-    });
+    function minimizeWidget() {
+      modal.style.display = 'none';
+      widgetButton.style.display = 'flex';
+    }
     
-    // Add click outside to close
-    document.addEventListener('click', function(event) {
-      if (!widget.contains(event.target)) {
-        modal.style.display = 'none';
-      }
-    });
+    function maximizeWidget() {
+      modal.style.display = 'flex';
+      widgetButton.style.display = 'none';
+    }
+    
+    minimizeButton.addEventListener('click', minimizeWidget);
+    widgetButton.addEventListener('click', maximizeWidget);
     
     // Add widget to page
     document.body.appendChild(widget);
@@ -754,6 +792,27 @@ export default function ScriptGenerator() {
               >
                 <option value="classic">Classic Grid</option>
                 <option value="modern">Modern Circles</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Initial State
+              </label>
+              <select
+                name="startMinimized"
+                value={widgetSettings.startMinimized.toString()}
+                onChange={(e) => {
+                  const value = e.target.value === 'true';
+                  setWidgetSettings(prev => ({
+                    ...prev,
+                    startMinimized: value
+                  }));
+                }}
+                className="input-field w-full"
+              >
+                <option value="true">Start Minimized</option>
+                <option value="false">Start Maximized (Chat-like)</option>
               </select>
             </div>
           </div>
