@@ -111,7 +111,7 @@ export default function WidgetDesigner() {
 
       <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Widget Generator</h1>
+          <h1 className="text-3xl font-bold text-gray-900">Widget Designer</h1>
           <p className="mt-2 text-sm text-gray-500">
             Create and customize your client intake widget for your website. Design the appearance, 
             add your branding colors, and configure how it behaves to optimize client conversions.

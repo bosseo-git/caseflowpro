@@ -67,7 +67,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   
   const navigation: NavItem[] = [
     { name: 'Dashboard', href: '/dashboard', icon: HomeIcon, current: currentPath === '/dashboard' },
-    { name: 'Widget Generator', href: '/dashboard/script-generator', icon: CommandLineIcon, current: currentPath === '/dashboard/script-generator' },
+    { name: 'Widget Designer', href: '/dashboard/widget-designer', icon: DocumentTextIcon, current: currentPath === '/dashboard/widget-designer' },
+    { name: 'Script Generator', href: '/dashboard/script-generator', icon: CommandLineIcon, current: currentPath === '/dashboard/script-generator' },
     { name: 'Integration Settings', href: '/dashboard/settings', icon: CogIcon, current: currentPath === '/dashboard/settings' },
     { name: 'Subscription', href: '/dashboard/subscription', icon: CreditCardIcon, current: currentPath === '/dashboard/subscription' },
     { name: 'Analytics', href: '/dashboard/analytics', icon: ChartBarIcon, current: currentPath === '/dashboard/analytics' },
