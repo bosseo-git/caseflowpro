@@ -49,6 +49,20 @@ export default function WidgetDesigner() {
   const [code, setCode] = useState<string>('')
   const [showCopiedMessage, setShowCopiedMessage] = useState(false)
 
+  // Safe toast function that won't throw if toast is undefined
+  const notifyUser = (message: string, type: 'success' | 'error' | 'info' = 'info') => {
+    if (typeof toast === 'function') {
+      try {
+        toast(message, type)
+      } catch (err) {
+        console.error('Error using toast notification:', err)
+        console.log(`${type.toUpperCase()}: ${message}`)
+      }
+    } else {
+      console.log(`${type.toUpperCase()}: ${message}`)
+    }
+  }
+
   useEffect(() => {
     if (status === 'unauthenticated') {
       router.push('/login')
@@ -58,7 +72,11 @@ export default function WidgetDesigner() {
   // Load widget settings from API
   useEffect(() => {
     const fetchSettings = async () => {
-      if (!session?.user?.id) return
+      if (!session?.user?.id) {
+        console.warn('User session or ID is missing')
+        setIsLoading(false)
+        return
+      }
 
       try {
         setIsLoading(true)
@@ -69,13 +87,13 @@ export default function WidgetDesigner() {
           setSavedSettings(data.settings as WidgetDesignSettings)
           
           // Generate embed code
-          const baseUrl = window.location.origin || 'https://caseflowpro.vercel.app'
+          const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://caseflowpro.vercel.app'
           const embedCode = `<script src="${baseUrl}/api/widget/${session.user.id}" async></script>`
           setCode(embedCode)
         }
       } catch (error) {
         console.error('Error fetching widget settings:', error)
-        toast('Failed to load widget settings.', 'error')
+        notifyUser('Failed to load widget settings.', 'error')
       } finally {
         setIsLoading(false)
       }
@@ -87,7 +105,10 @@ export default function WidgetDesigner() {
   }, [session])
 
   const handleSaveSettings = async (settings: WidgetDesignSettings) => {
-    if (!session?.user?.id) return
+    if (!session?.user?.id) {
+      notifyUser('User session expired. Please log in again.', 'error')
+      return
+    }
 
     try {
       setIsSaving(true)
@@ -105,36 +126,74 @@ export default function WidgetDesigner() {
       if (response.ok) {
         setSavedSettings(settings)
         setIsShowingDesigner(false)
-        toast('Widget design saved successfully!', 'success')
+        notifyUser('Widget design saved successfully!', 'success')
       } else {
-        toast('Failed to save widget settings.', 'error')
+        notifyUser('Failed to save widget settings.', 'error')
       }
     } catch (error) {
       console.error('Error saving widget settings:', error)
-      toast('An error occurred while saving settings.', 'error')
+      notifyUser('An error occurred while saving settings.', 'error')
     } finally {
       setIsSaving(false)
     }
   }
 
   const copyCodeToClipboard = () => {
-    navigator.clipboard.writeText(code).then(
-      () => {
-        setShowCopiedMessage(true)
-        setTimeout(() => {
-          setShowCopiedMessage(false)
-        }, 2000)
-        toast('Widget code copied to clipboard!', 'success')
-      },
-      (err) => {
-        console.error('Could not copy code: ', err)
-        toast('Failed to copy code.', 'error')
+    if (!code) {
+      notifyUser('No code available to copy.', 'error')
+      return
+    }
+    
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(code).then(
+        () => {
+          setShowCopiedMessage(true)
+          setTimeout(() => {
+            setShowCopiedMessage(false)
+          }, 2000)
+          notifyUser('Widget code copied to clipboard!', 'success')
+        },
+        (err) => {
+          console.error('Could not copy code: ', err)
+          notifyUser('Failed to copy code.', 'error')
+        }
+      )
+    } else {
+      console.log('Clipboard API not available')
+      // Fallback method for copying
+      const textArea = document.createElement('textarea')
+      textArea.value = code
+      document.body.appendChild(textArea)
+      textArea.focus()
+      textArea.select()
+      try {
+        const successful = document.execCommand('copy')
+        const msg = successful ? 'successful' : 'unsuccessful'
+        console.log('Fallback: Copying text was ' + msg)
+        setShowCopiedMessage(successful)
+        if (successful) {
+          notifyUser('Widget code copied to clipboard!', 'success')
+          setTimeout(() => setShowCopiedMessage(false), 2000)
+        }
+      } catch (err) {
+        console.error('Fallback: Unable to copy', err)
+        notifyUser('Failed to copy code.', 'error')
       }
-    )
+      document.body.removeChild(textArea)
+    }
   }
 
   const openPreview = () => {
     setIsPreviewOpen(true)
+  }
+
+  // Safely render the component
+  if (status === 'loading') {
+    return <DashboardLayout>
+      <div className="flex justify-center items-center h-full">
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary-600"></div>
+      </div>
+    </DashboardLayout>
   }
 
   return (

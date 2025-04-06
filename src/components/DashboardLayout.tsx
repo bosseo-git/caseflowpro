@@ -2,6 +2,7 @@ import { useState, ReactNode } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useSession, signOut } from 'next-auth/react'
+import { Toaster } from '@/components/ui/Toaster'
 import { 
   HomeIcon, 
   ChatBubbleLeftRightIcon, 
@@ -224,6 +225,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         <main className="flex-1 pb-8">
           {children}
         </main>
+        
+        {/* Include Toaster for notifications */}
+        <Toaster />
       </div>
     </div>
   )
