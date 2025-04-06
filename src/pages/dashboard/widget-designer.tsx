@@ -4,21 +4,12 @@ import { useSession } from 'next-auth/react'
 import DashboardLayout from '@/components/DashboardLayout'
 import ModalDesigner from '@/components/ModalDesigner'
 import WidgetPreview from '@/components/WidgetPreview'
-import { EyeIcon, XMarkIcon } from '@heroicons/react/24/outline'
-import { CheckCircleIcon, ExclamationCircleIcon, InformationCircleIcon } from '@heroicons/react/24/solid'
+import { EyeIcon } from '@heroicons/react/24/outline'
 
 // Define widget design settings type
 type WidgetPosition = 'right' | 'left'
 type WidgetLayout = 'classic' | 'modern' | 'circles' | 'compact' | 'minimalist'
 type ModalTheme = 'default' | 'minimal' | 'bordered' | 'dark' | 'branded'
-
-type NotificationType = 'success' | 'error' | 'info'
-
-type Notification = {
-  id: string
-  message: string
-  type: NotificationType
-}
 
 type WidgetDesignSettings = {
   theme: ModalTheme
@@ -46,37 +37,6 @@ type WidgetDesignSettings = {
   }
 }
 
-// Simple notification component
-function NotificationItem({ notification, onDismiss }: { notification: Notification, onDismiss: (id: string) => void }) {
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      onDismiss(notification.id)
-    }, 5000)
-    
-    return () => clearTimeout(timer)
-  }, [notification.id, onDismiss])
-  
-  const bgColor = 
-    notification.type === 'success' ? 'bg-green-500' :
-    notification.type === 'error' ? 'bg-red-500' : 'bg-blue-500'
-    
-  const Icon = 
-    notification.type === 'success' ? CheckCircleIcon :
-    notification.type === 'error' ? ExclamationCircleIcon : InformationCircleIcon
-  
-  return (
-    <div className={`flex items-center justify-between p-4 mb-4 text-white rounded-md shadow-lg ${bgColor}`}>
-      <div className="flex items-center">
-        <Icon className="w-5 h-5 mr-2" />
-        <p>{notification.message}</p>
-      </div>
-      <button onClick={() => onDismiss(notification.id)} className="ml-4 text-white hover:text-gray-200">
-        <XMarkIcon className="w-5 h-5" />
-      </button>
-    </div>
-  )
-}
-
 export default function WidgetDesigner() {
   const { data: session, status } = useSession()
   const router = useRouter()
@@ -87,22 +47,6 @@ export default function WidgetDesigner() {
   const [isPreviewOpen, setIsPreviewOpen] = useState(false)
   const [code, setCode] = useState<string>('')
   const [showCopiedMessage, setShowCopiedMessage] = useState(false)
-  const [notifications, setNotifications] = useState<Notification[]>([])
-
-  // Safe notification function that doesn't rely on toast
-  const notifyUser = (message: string, type: NotificationType = 'info') => {
-    const newNotification = {
-      id: Math.random().toString(36).substring(2, 9),
-      message,
-      type
-    }
-    setNotifications(prev => [...prev, newNotification])
-    console.log(`${type.toUpperCase()}: ${message}`)
-  }
-  
-  const dismissNotification = (id: string) => {
-    setNotifications(prev => prev.filter(notification => notification.id !== id))
-  }
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -134,7 +78,6 @@ export default function WidgetDesigner() {
         }
       } catch (error) {
         console.error('Error fetching widget settings:', error)
-        notifyUser('Failed to load widget settings.', 'error')
       } finally {
         setIsLoading(false)
       }
@@ -147,7 +90,7 @@ export default function WidgetDesigner() {
 
   const handleSaveSettings = async (settings: WidgetDesignSettings) => {
     if (!session?.user?.id) {
-      notifyUser('User session expired. Please log in again.', 'error')
+      console.error('User session expired. Please log in again.')
       return
     }
 
@@ -167,13 +110,12 @@ export default function WidgetDesigner() {
       if (response.ok) {
         setSavedSettings(settings)
         setIsShowingDesigner(false)
-        notifyUser('Widget design saved successfully!', 'success')
+        console.log('Widget design saved successfully!')
       } else {
-        notifyUser('Failed to save widget settings.', 'error')
+        console.error('Failed to save widget settings.')
       }
     } catch (error) {
       console.error('Error saving widget settings:', error)
-      notifyUser('An error occurred while saving settings.', 'error')
     } finally {
       setIsSaving(false)
     }
@@ -181,7 +123,7 @@ export default function WidgetDesigner() {
 
   const copyCodeToClipboard = () => {
     if (!code) {
-      notifyUser('No code available to copy.', 'error')
+      console.error('No code available to copy.')
       return
     }
     
@@ -192,11 +134,10 @@ export default function WidgetDesigner() {
           setTimeout(() => {
             setShowCopiedMessage(false)
           }, 2000)
-          notifyUser('Widget code copied to clipboard!', 'success')
+          console.log('Widget code copied to clipboard!')
         },
         (err) => {
           console.error('Could not copy code: ', err)
-          notifyUser('Failed to copy code.', 'error')
         }
       )
     } else {
@@ -213,12 +154,10 @@ export default function WidgetDesigner() {
         console.log('Fallback: Copying text was ' + msg)
         setShowCopiedMessage(successful)
         if (successful) {
-          notifyUser('Widget code copied to clipboard!', 'success')
           setTimeout(() => setShowCopiedMessage(false), 2000)
         }
       } catch (err) {
         console.error('Fallback: Unable to copy', err)
-        notifyUser('Failed to copy code.', 'error')
       }
       document.body.removeChild(textArea)
     }
@@ -238,18 +177,7 @@ export default function WidgetDesigner() {
   }
 
   return (
-    <DashboardLayout>
-      {/* Custom notification container */}
-      <div className="fixed z-50 flex flex-col items-end top-4 right-4 space-y-4">
-        {notifications.map(notification => (
-          <NotificationItem 
-            key={notification.id} 
-            notification={notification} 
-            onDismiss={dismissNotification}
-          />
-        ))}
-      </div>
-      
+    <DashboardLayout>      
       <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-semibold">Widget Designer</h1>
