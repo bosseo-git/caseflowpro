@@ -5,8 +5,26 @@ import { ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline'
 import DashboardLayout from '@/components/DashboardLayout'
 import { useUser } from '@/lib/hooks'
 
+// Define types
+type IntegrationCategory = 'crm' | 'email' | 'chat' | 'analytics' | 'automation' | 'notifications' | 'scheduling' | 'other';
+type SetupDifficulty = 'Easy' | 'Medium' | 'Advanced';
+
+type Integration = {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  category: IntegrationCategory;
+  connected: boolean;
+  lastSynced?: string;
+  isPremium?: boolean;
+  popularityRank: number;
+  setupDifficulty: SetupDifficulty;
+  documentationUrl: string;
+};
+
 // Sample integrations data - in a real application, this would come from your backend
-const availableIntegrations = [
+const availableIntegrations: Integration[] = [
   {
     id: 'salesforce',
     name: 'Salesforce',
@@ -122,24 +140,6 @@ const availableIntegrations = [
     documentationUrl: 'https://example.com/docs/webhook'
   }
 ];
-
-// Define types
-type IntegrationCategory = 'crm' | 'email' | 'chat' | 'analytics' | 'automation' | 'notifications' | 'scheduling' | 'other';
-type SetupDifficulty = 'Easy' | 'Medium' | 'Advanced';
-
-type Integration = {
-  id: string;
-  name: string;
-  description: string;
-  icon: string;
-  category: IntegrationCategory;
-  connected: boolean;
-  lastSynced?: string;
-  isPremium?: boolean;
-  popularityRank: number;
-  setupDifficulty: SetupDifficulty;
-  documentationUrl: string;
-};
 
 export default function IntegrationsPage() {
   const router = useRouter();

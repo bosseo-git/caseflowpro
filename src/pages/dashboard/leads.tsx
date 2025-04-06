@@ -5,8 +5,23 @@ import { EllipsisVerticalIcon, MagnifyingGlassIcon } from '@heroicons/react/24/o
 import DashboardLayout from '@/components/DashboardLayout'
 import { useUser } from '@/lib/hooks'
 
+// Define types
+type LeadStatus = 'New' | 'Contacted' | 'Qualified' | 'Disqualified' | 'Converted';
+type Lead = {
+  id: string;
+  name: string;
+  phone: string;
+  email: string;
+  source: string;
+  date: string;
+  status: LeadStatus;
+  assignedTo: string | null;
+  caseType: string;
+  notes: string;
+};
+
 // Sample data - in a real application, this would come from your backend
-const sampleLeads = [
+const sampleLeads: Lead[] = [
   {
     id: '1',
     name: 'John Doe',
@@ -68,21 +83,6 @@ const sampleLeads = [
     notes: 'Signed up for a will creation package after consultation'
   }
 ];
-
-// Define types
-type LeadStatus = 'New' | 'Contacted' | 'Qualified' | 'Disqualified' | 'Converted';
-type Lead = {
-  id: string;
-  name: string;
-  phone: string;
-  email: string;
-  source: string;
-  date: string;
-  status: LeadStatus;
-  assignedTo: string | null;
-  caseType: string;
-  notes: string;
-};
 
 export default function LeadsPage() {
   const router = useRouter();

@@ -5,8 +5,24 @@ import { ArrowRightCircleIcon, CheckIcon, XMarkIcon } from '@heroicons/react/24/
 import DashboardLayout from '@/components/DashboardLayout'
 import { useUser } from '@/lib/hooks'
 
+// Define types
+type Industry = 'Law' | 'Real Estate' | 'Healthcare' | 'Dental' | 'Insurance' | 'Contractors' | 'Restaurants' | 'Various';
+type Category = 'legal' | 'real-estate' | 'healthcare' | 'finance' | 'home-services' | 'hospitality' | 'luxury';
+
+type Template = {
+  id: string;
+  name: string;
+  description: string;
+  previewImage: string;
+  category: Category;
+  industry: Industry;
+  popularityScore: number;
+  reviewCount: number;
+  widgetSettings: any;
+};
+
 // Sample templates data - in a real application, this would come from your backend
-const availableTemplates = [
+const availableTemplates: Template[] = [
   {
     id: 'law-1',
     name: 'Personal Injury Law',
@@ -206,22 +222,6 @@ const availableTemplates = [
     }
   }
 ];
-
-// Define types
-type Industry = 'Law' | 'Real Estate' | 'Healthcare' | 'Dental' | 'Insurance' | 'Contractors' | 'Restaurants' | 'Various';
-type Category = 'legal' | 'real-estate' | 'healthcare' | 'finance' | 'home-services' | 'hospitality' | 'luxury';
-
-type Template = {
-  id: string;
-  name: string;
-  description: string;
-  previewImage: string;
-  category: Category;
-  industry: Industry;
-  popularityScore: number;
-  reviewCount: number;
-  widgetSettings: any;
-};
 
 export default function TemplatesPage() {
   const router = useRouter();
