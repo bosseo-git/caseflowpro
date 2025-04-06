@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, ChangeEvent } from 'react'
 import { useRouter } from 'next/router'
 import DashboardLayout from '@/components/DashboardLayout'
 import { useUser } from '@/lib/hooks'
@@ -26,7 +26,7 @@ export default function SettingsPage() {
   });
 
   // Load user data when available
-  useState(() => {
+  useEffect(() => {
     if (user) {
       setGeneralSettings({
         companyName: user.companyName || '',
@@ -37,9 +37,9 @@ export default function SettingsPage() {
         language: user.language || 'en'
       });
     }
-  });
+  }, [user]);
 
-  const handleGeneralChange = (e) => {
+  const handleGeneralChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setGeneralSettings(prev => ({
       ...prev,
@@ -47,7 +47,7 @@ export default function SettingsPage() {
     }));
   };
 
-  const handleNotificationChange = (e) => {
+  const handleNotificationChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, checked } = e.target;
     setNotificationSettings(prev => ({
       ...prev,
