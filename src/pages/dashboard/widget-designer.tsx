@@ -47,7 +47,21 @@ export default function WidgetDesigner() {
   const [isPreviewOpen, setIsPreviewOpen] = useState(false)
   const [code, setCode] = useState<string>('')
   const [showCopiedMessage, setShowCopiedMessage] = useState(false)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [successMessage, setSuccessMessage] = useState<string | null>(null)
 
+  // Clear messages after a delay
+  useEffect(() => {
+    if (errorMessage || successMessage) {
+      const timer = setTimeout(() => {
+        setErrorMessage(null)
+        setSuccessMessage(null)
+      }, 3000)
+      return () => clearTimeout(timer)
+    }
+  }, [errorMessage, successMessage])
+
+  // Redirect to login if not authenticated
   useEffect(() => {
     if (status === 'unauthenticated') {
       router.push('/login')
@@ -58,7 +72,6 @@ export default function WidgetDesigner() {
   useEffect(() => {
     const fetchSettings = async () => {
       if (!session?.user?.id) {
-        console.warn('User session or ID is missing')
         setIsLoading(false)
         return
       }
@@ -78,6 +91,7 @@ export default function WidgetDesigner() {
         }
       } catch (error) {
         console.error('Error fetching widget settings:', error)
+        setErrorMessage('Failed to load widget settings')
       } finally {
         setIsLoading(false)
       }
@@ -90,7 +104,7 @@ export default function WidgetDesigner() {
 
   const handleSaveSettings = async (settings: WidgetDesignSettings) => {
     if (!session?.user?.id) {
-      console.error('User session expired. Please log in again.')
+      setErrorMessage('User session expired. Please log in again.')
       return
     }
 
@@ -110,12 +124,13 @@ export default function WidgetDesigner() {
       if (response.ok) {
         setSavedSettings(settings)
         setIsShowingDesigner(false)
-        console.log('Widget design saved successfully!')
+        setSuccessMessage('Widget design saved successfully!')
       } else {
-        console.error('Failed to save widget settings.')
+        setErrorMessage('Failed to save widget settings')
       }
     } catch (error) {
       console.error('Error saving widget settings:', error)
+      setErrorMessage('Error saving widget settings')
     } finally {
       setIsSaving(false)
     }
@@ -123,43 +138,49 @@ export default function WidgetDesigner() {
 
   const copyCodeToClipboard = () => {
     if (!code) {
-      console.error('No code available to copy.')
+      setErrorMessage('No code available to copy')
       return
     }
     
-    if (typeof navigator !== 'undefined' && navigator.clipboard) {
-      navigator.clipboard.writeText(code).then(
-        () => {
-          setShowCopiedMessage(true)
-          setTimeout(() => {
-            setShowCopiedMessage(false)
-          }, 2000)
-          console.log('Widget code copied to clipboard!')
-        },
-        (err) => {
-          console.error('Could not copy code: ', err)
+    try {
+      if (typeof navigator !== 'undefined' && navigator.clipboard) {
+        navigator.clipboard.writeText(code)
+          .then(() => {
+            setShowCopiedMessage(true)
+            setSuccessMessage('Widget code copied to clipboard!')
+            setTimeout(() => {
+              setShowCopiedMessage(false)
+            }, 2000)
+          })
+          .catch((err) => {
+            console.error('Could not copy code: ', err)
+            setErrorMessage('Could not copy code to clipboard')
+          })
+      } else {
+        // Fallback method for copying
+        const textArea = document.createElement('textarea')
+        textArea.value = code
+        document.body.appendChild(textArea)
+        textArea.focus()
+        textArea.select()
+        try {
+          const successful = document.execCommand('copy')
+          if (successful) {
+            setShowCopiedMessage(true)
+            setSuccessMessage('Widget code copied to clipboard!')
+            setTimeout(() => setShowCopiedMessage(false), 2000)
+          } else {
+            setErrorMessage('Failed to copy code to clipboard')
+          }
+        } catch (err) {
+          console.error('Fallback: Unable to copy', err)
+          setErrorMessage('Unable to copy code to clipboard')
         }
-      )
-    } else {
-      console.log('Clipboard API not available')
-      // Fallback method for copying
-      const textArea = document.createElement('textarea')
-      textArea.value = code
-      document.body.appendChild(textArea)
-      textArea.focus()
-      textArea.select()
-      try {
-        const successful = document.execCommand('copy')
-        const msg = successful ? 'successful' : 'unsuccessful'
-        console.log('Fallback: Copying text was ' + msg)
-        setShowCopiedMessage(successful)
-        if (successful) {
-          setTimeout(() => setShowCopiedMessage(false), 2000)
-        }
-      } catch (err) {
-        console.error('Fallback: Unable to copy', err)
+        document.body.removeChild(textArea)
       }
-      document.body.removeChild(textArea)
+    } catch (error) {
+      console.error('Error copying to clipboard:', error)
+      setErrorMessage('Error copying to clipboard')
     }
   }
 
@@ -179,6 +200,31 @@ export default function WidgetDesigner() {
   return (
     <DashboardLayout>      
       <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        {/* Inline notification messages */}
+        {errorMessage && (
+          <div className="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
+            {errorMessage}
+            <button 
+              className="absolute right-0 top-0 mt-3 mr-4" 
+              onClick={() => setErrorMessage(null)}
+            >
+              <span className="text-red-500">&times;</span>
+            </button>
+          </div>
+        )}
+        
+        {successMessage && (
+          <div className="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative">
+            {successMessage}
+            <button 
+              className="absolute right-0 top-0 mt-3 mr-4" 
+              onClick={() => setSuccessMessage(null)}
+            >
+              <span className="text-green-500">&times;</span>
+            </button>
+          </div>
+        )}
+
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-semibold">Widget Designer</h1>
           {savedSettings && (
@@ -206,106 +252,85 @@ export default function WidgetDesigner() {
             <>
               <div className="flex flex-col md:flex-row md:space-x-4">
                 <div className="mb-4 md:mb-0 w-full md:w-2/3">
-                  <div className="bg-gray-50 rounded-md p-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <h3 className="text-sm font-medium">Widget Placement Code</h3>
+                  <h3 className="text-lg font-medium mb-2">Appearance Settings</h3>
+                  {savedSettings ? (
+                    <div className="bg-gray-50 p-4 rounded-lg">
+                      <p className="text-gray-600">
+                        You can customize the appearance of your widget by clicking the "Edit Design" button below.
+                      </p>
                       <button
-                        onClick={copyCodeToClipboard}
-                        className="text-sm text-primary-600 hover:text-primary-700 focus:outline-none"
+                        onClick={() => setIsShowingDesigner(true)}
+                        className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
                       >
-                        Copy to Clipboard
+                        Edit Design
                       </button>
                     </div>
-                    <div className="relative">
-                      <pre className="text-xs bg-gray-100 p-3 rounded overflow-x-auto">{code}</pre>
-                      {showCopiedMessage && (
-                        <div className="absolute top-0 right-0 m-2 px-2 py-1 bg-green-100 text-green-800 text-xs rounded">
-                          Copied!
-                        </div>
-                      )}
+                  ) : (
+                    <div className="bg-gray-50 p-4 rounded-lg">
+                      <p className="text-gray-600">
+                        You haven't set up your widget yet. Click the button below to design your widget.
+                      </p>
+                      <button
+                        onClick={() => setIsShowingDesigner(true)}
+                        className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+                      >
+                        Design Widget
+                      </button>
                     </div>
-                  </div>
+                  )}
                 </div>
 
                 <div className="w-full md:w-1/3">
-                  <div className="border rounded-lg p-4">
-                    <h3 className="text-sm font-medium mb-2">Widget Appearance</h3>
-                    <p className="text-xs text-gray-600 mb-3">
-                      Customize how your widget looks and feels.
-                    </p>
-                    <button
-                      onClick={() => setIsShowingDesigner(true)}
-                      className="w-full px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm rounded focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
-                    >
-                      Customize Widget
-                    </button>
+                  <h3 className="text-lg font-medium mb-2">Embed Code</h3>
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    {code ? (
+                      <>
+                        <p className="text-gray-600 mb-2">
+                          Copy and paste this code into your website's HTML, just before the closing &lt;/body&gt; tag.
+                        </p>
+                        <div className="relative">
+                          <div className="bg-gray-100 p-3 rounded font-mono text-sm overflow-x-auto">
+                            {code}
+                          </div>
+                          <button
+                            className="mt-2 inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+                            onClick={copyCodeToClipboard}
+                          >
+                            {showCopiedMessage ? 'Copied!' : 'Copy Code'}
+                          </button>
+                        </div>
+                      </>
+                    ) : (
+                      <p className="text-gray-600">
+                        Design your widget first to get the embed code.
+                      </p>
+                    )}
                   </div>
                 </div>
-              </div>
-
-              <div className="mt-8">
-                <h3 className="text-lg font-medium mb-2">Widget Preview</h3>
-                <p className="text-sm text-gray-600 mb-4">
-                  This is a simple preview of how your widget will appear on your website. You can see the full interactive preview by clicking the "Preview Widget" button.
-                </p>
-                {savedSettings && (
-                  <div className="h-28 border rounded-lg bg-gray-50 p-4 flex items-center justify-center relative">
-                    <div className={`absolute ${savedSettings.position === 'right' ? 'right-5' : 'left-5'} bottom-5 flex space-x-2`}>
-                      {savedSettings.layout === 'classic' ? (
-                        <div 
-                          className={`px-3 py-2 text-white text-sm rounded-md shadow-md`}
-                          style={{ backgroundColor: savedSettings.primaryColor }}
-                        >
-                          Contact Us
-                        </div>
-                      ) : (
-                        <div className="flex space-x-2">
-                          <div 
-                            className={`h-10 w-10 flex items-center justify-center rounded-full shadow-md`}
-                            style={{ backgroundColor: savedSettings.buttonColors.call }}
-                          >
-                            <span className="text-white">C</span>
-                          </div>
-                          <div 
-                            className={`h-10 w-10 flex items-center justify-center rounded-full shadow-md`}
-                            style={{ backgroundColor: savedSettings.buttonColors.sms }}
-                          >
-                            <span className="text-white">S</span>
-                          </div>
-                          <div 
-                            className={`h-10 w-10 flex items-center justify-center rounded-full shadow-md`}
-                            style={{ backgroundColor: savedSettings.buttonColors.chat }}
-                          >
-                            <span className="text-white">M</span>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
               </div>
             </>
           )}
         </div>
-
-        {isShowingDesigner && savedSettings && (
-          <ModalDesigner
-            onSave={handleSaveSettings}
-            initialSettings={savedSettings}
-            onClose={() => setIsShowingDesigner(false)}
-            isSaving={isSaving}
-          />
-        )}
-
-        {/* Full Widget Preview */}
-        {savedSettings && (
-          <WidgetPreview
-            settings={savedSettings}
-            isOpen={isPreviewOpen}
-            onClose={() => setIsPreviewOpen(false)}
-          />
-        )}
       </div>
+
+      {/* Modal Designer */}
+      {isShowingDesigner && (
+        <ModalDesigner
+          onSave={handleSaveSettings}
+          initialSettings={savedSettings || {}}
+          onClose={() => setIsShowingDesigner(false)}
+          isSaving={isSaving}
+        />
+      )}
+
+      {/* Widget Preview */}
+      {isPreviewOpen && savedSettings && (
+        <WidgetPreview
+          settings={savedSettings}
+          isOpen={isPreviewOpen}
+          onClose={() => setIsPreviewOpen(false)}
+        />
+      )}
     </DashboardLayout>
   )
 } 
