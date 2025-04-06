@@ -5,7 +5,7 @@ import DashboardLayout from '@/components/DashboardLayout'
 import ModalDesigner from '@/components/ModalDesigner'
 import WidgetPreview from '@/components/WidgetPreview'
 import { EyeIcon } from '@heroicons/react/24/outline'
-import { toast } from '@/components/ui/Toaster'
+import { toastState } from '@/components/ui/Toaster'
 
 // Define widget design settings type
 type WidgetPosition = 'right' | 'left'
@@ -51,14 +51,14 @@ export default function WidgetDesigner() {
 
   // Safe toast function that won't throw if toast is undefined
   const notifyUser = (message: string, type: 'success' | 'error' | 'info' = 'info') => {
-    if (typeof toast === 'function') {
-      try {
-        toast(message, type)
-      } catch (err) {
-        console.error('Error using toast notification:', err)
+    try {
+      if (toastState && typeof toastState.addToast === 'function') {
+        toastState.addToast({ message, type })
+      } else {
         console.log(`${type.toUpperCase()}: ${message}`)
       }
-    } else {
+    } catch (err) {
+      console.error('Error using toast notification:', err)
       console.log(`${type.toUpperCase()}: ${message}`)
     }
   }
