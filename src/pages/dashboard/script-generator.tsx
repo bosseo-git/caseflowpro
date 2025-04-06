@@ -20,6 +20,8 @@ export default function ScriptGenerator() {
     theme: 'light',
     layout: 'classic',
     startMinimized: true,
+    externalScript: '',
+    useExternalScript: false,
     analytics: {
       enabled: true,
       trackEvents: true,
@@ -68,43 +70,34 @@ export default function ScriptGenerator() {
     }
   }, [user])
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    const isCheckbox = e.target instanceof HTMLInputElement && e.target.type === 'checkbox';
     
-    if (name.startsWith('buttonLabels.')) {
-      const buttonType = name.split('.')[1]
+    // Handle nested properties using dot notation (e.g., 'buttonLabels.call')
+    if (name.includes('.')) {
+      const [parent, child] = name.split('.');
       setWidgetSettings(prev => ({
         ...prev,
-        buttonLabels: {
-          ...prev.buttonLabels,
-          [buttonType]: value
+        [parent]: {
+          ...prev[parent as keyof typeof prev] as Record<string, any>,
+          [child]: value
         }
-      }))
-    } else if (name.startsWith('buttonActions.')) {
-      const buttonType = name.split('.')[1]
+      }));
+    } else if (isCheckbox) {
+      // For checkbox inputs
       setWidgetSettings(prev => ({
         ...prev,
-        buttonActions: {
-          ...prev.buttonActions,
-          [buttonType]: value
-        }
-      }))
-    } else if (name.startsWith('buttonColors.')) {
-      const buttonType = name.split('.')[1]
-      setWidgetSettings(prev => ({
-        ...prev,
-        buttonColors: {
-          ...prev.buttonColors,
-          [buttonType]: value
-        }
-      }))
+        [name]: (e.target as HTMLInputElement).checked
+      }));
     } else {
+      // For text inputs and selects
       setWidgetSettings(prev => ({
         ...prev,
         [name]: value
-      }))
+      }));
     }
-  }
+  };
 
   const generateScript = () => {
     const { 
@@ -120,7 +113,9 @@ export default function ScriptGenerator() {
       theme, 
       layout,
       startMinimized,
-      analytics
+      analytics,
+      externalScript,
+      useExternalScript
     } = widgetSettings
     
     // Calculate colors based on theme
@@ -381,6 +376,36 @@ export default function ScriptGenerator() {
         });
       }
       
+      ${useExternalScript ? `
+      // Use external GoHighLevel script
+      if (!window.ghlChatWidgetLoaded) {
+        window.ghlChatWidgetLoaded = true;
+        
+        // Create and inject the external script
+        var externalScript = document.createElement('script');
+        ${externalScript ? `
+        // Custom script provided by user
+        externalScript.src = "${externalScript.match(/src=["']([^"']*)["']/)?.[1] || ''}";
+        
+        // Add any data attributes from the original script
+        var resourcesUrl = "${externalScript.match(/data-resources-url=["']([^"']*)["']/)?.[1] || ''}";
+        var widgetId = "${externalScript.match(/data-widget-id=["']([^"']*)["']/)?.[1] || ''}";
+        
+        if (resourcesUrl) {
+          externalScript.setAttribute('data-resources-url', resourcesUrl);
+        }
+        
+        if (widgetId) {
+          externalScript.setAttribute('data-widget-id', widgetId);
+        }` : ''}
+        
+        document.body.appendChild(externalScript);
+      }
+      
+      // Attempt to trigger the chat widget
+      if (window.ghl && window.ghl.widget && typeof window.ghl.widget.open === 'function') {
+        window.ghl.widget.open();
+      }` : `
       if (buttonActions.sms === 'sms') {
         window.location.href = 'sms:${companyPhone}';
       } else {
@@ -391,7 +416,7 @@ export default function ScriptGenerator() {
         var formModal = createFormModal('SMS');
         document.body.appendChild(formModal);
         formModal.style.display = 'block';
-      }
+      }`}
     }
     
     function handleWhatsappAction() {
@@ -410,6 +435,36 @@ export default function ScriptGenerator() {
         });
       }
       
+      ${useExternalScript ? `
+      // Use external GoHighLevel script
+      if (!window.ghlChatWidgetLoaded) {
+        window.ghlChatWidgetLoaded = true;
+        
+        // Create and inject the external script
+        var externalScript = document.createElement('script');
+        ${externalScript ? `
+        // Custom script provided by user
+        externalScript.src = "${externalScript.match(/src=["']([^"']*)["']/)?.[1] || ''}";
+        
+        // Add any data attributes from the original script
+        var resourcesUrl = "${externalScript.match(/data-resources-url=["']([^"']*)["']/)?.[1] || ''}";
+        var widgetId = "${externalScript.match(/data-widget-id=["']([^"']*)["']/)?.[1] || ''}";
+        
+        if (resourcesUrl) {
+          externalScript.setAttribute('data-resources-url', resourcesUrl);
+        }
+        
+        if (widgetId) {
+          externalScript.setAttribute('data-widget-id', widgetId);
+        }` : ''}
+        
+        document.body.appendChild(externalScript);
+      }
+      
+      // Attempt to trigger the chat widget
+      if (window.ghl && window.ghl.widget && typeof window.ghl.widget.open === 'function') {
+        window.ghl.widget.open();
+      }` : `
       if (buttonActions.chat === 'chat') {
         // Here you could open a chat widget if you have one integrated
         console.log('Opening chat widget');
@@ -422,7 +477,7 @@ export default function ScriptGenerator() {
         var formModal = createFormModal('Chat');
         document.body.appendChild(formModal);
         formModal.style.display = 'block';
-      }
+      }`}
     }
     
     // Create the buttons
@@ -973,16 +1028,6 @@ export default function ScriptGenerator() {
             </div>
           </div>
 
-          {/* Save Button */}
-          <div className="mt-6 flex justify-end">
-            <button
-              onClick={handleSaveSettings}
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
-            >
-              {isSaving ? 'Saving...' : 'Save Settings'}
-            </button>
-          </div>
-
           <h3 className="text-md font-medium mt-6 mb-3">Button Actions</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
@@ -1045,6 +1090,58 @@ export default function ScriptGenerator() {
                 <option value="form">Show Form</option>
               </select>
             </div>
+          </div>
+
+          <h3 className="text-md font-medium mt-6 mb-3">External Integration</h3>
+          <div className="bg-white rounded-lg border border-gray-200 p-4 mb-6">
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Custom Chat Script (GoHighLevel)
+              </label>
+              <p className="text-xs text-gray-500 mb-2">
+                Paste your GoHighLevel script below. This will be triggered when users click the SMS or Live Chat buttons instead of the default action.
+              </p>
+              <textarea
+                name="externalScript"
+                value={widgetSettings.externalScript || ''}
+                onChange={handleInputChange}
+                placeholder="<script src='https://widgets.leadconnectorhq.com/loader.js' data-resources-url='https://widgets.leadconnectorhq.com/chat-widget/loader.js' data-widget-id='YOUR_WIDGET_ID'></script>"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm font-mono"
+                rows={6}
+              />
+              <div className="mt-2 flex items-center">
+                <input
+                  id="useExternalScript"
+                  name="useExternalScript"
+                  type="checkbox"
+                  checked={widgetSettings.useExternalScript || false}
+                  onChange={(e) => {
+                    setWidgetSettings({
+                      ...widgetSettings,
+                      useExternalScript: e.target.checked
+                    });
+                  }}
+                  className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+                />
+                <label htmlFor="useExternalScript" className="ml-2 block text-sm text-gray-700">
+                  Enable external chat script (overrides default SMS and Live Chat actions)
+                </label>
+              </div>
+            </div>
+            
+            <div className="text-xs bg-blue-50 text-blue-700 p-3 rounded-md">
+              <strong>Note:</strong> When enabled, clicking on SMS or Live Chat buttons will trigger your custom script instead of the default actions. Make sure your script is properly formatted and includes the correct widget ID.
+            </div>
+          </div>
+
+          {/* Save Button */}
+          <div className="mt-6 flex justify-end">
+            <button
+              onClick={handleSaveSettings}
+              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+            >
+              {isSaving ? 'Saving...' : 'Save Settings'}
+            </button>
           </div>
         </div>
         
