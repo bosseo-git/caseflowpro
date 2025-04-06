@@ -4,13 +4,21 @@ import { useSession } from 'next-auth/react'
 import DashboardLayout from '@/components/DashboardLayout'
 import ModalDesigner from '@/components/ModalDesigner'
 import WidgetPreview from '@/components/WidgetPreview'
-import { EyeIcon } from '@heroicons/react/24/outline'
-import { toastState } from '@/components/ui/Toaster'
+import { EyeIcon, XMarkIcon } from '@heroicons/react/24/outline'
+import { CheckCircleIcon, ExclamationCircleIcon, InformationCircleIcon } from '@heroicons/react/24/solid'
 
 // Define widget design settings type
 type WidgetPosition = 'right' | 'left'
 type WidgetLayout = 'classic' | 'modern' | 'circles' | 'compact' | 'minimalist'
 type ModalTheme = 'default' | 'minimal' | 'bordered' | 'dark' | 'branded'
+
+type NotificationType = 'success' | 'error' | 'info'
+
+type Notification = {
+  id: string
+  message: string
+  type: NotificationType
+}
 
 type WidgetDesignSettings = {
   theme: ModalTheme
@@ -38,6 +46,37 @@ type WidgetDesignSettings = {
   }
 }
 
+// Simple notification component
+function NotificationItem({ notification, onDismiss }: { notification: Notification, onDismiss: (id: string) => void }) {
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      onDismiss(notification.id)
+    }, 5000)
+    
+    return () => clearTimeout(timer)
+  }, [notification.id, onDismiss])
+  
+  const bgColor = 
+    notification.type === 'success' ? 'bg-green-500' :
+    notification.type === 'error' ? 'bg-red-500' : 'bg-blue-500'
+    
+  const Icon = 
+    notification.type === 'success' ? CheckCircleIcon :
+    notification.type === 'error' ? ExclamationCircleIcon : InformationCircleIcon
+  
+  return (
+    <div className={`flex items-center justify-between p-4 mb-4 text-white rounded-md shadow-lg ${bgColor}`}>
+      <div className="flex items-center">
+        <Icon className="w-5 h-5 mr-2" />
+        <p>{notification.message}</p>
+      </div>
+      <button onClick={() => onDismiss(notification.id)} className="ml-4 text-white hover:text-gray-200">
+        <XMarkIcon className="w-5 h-5" />
+      </button>
+    </div>
+  )
+}
+
 export default function WidgetDesigner() {
   const { data: session, status } = useSession()
   const router = useRouter()
@@ -48,19 +87,21 @@ export default function WidgetDesigner() {
   const [isPreviewOpen, setIsPreviewOpen] = useState(false)
   const [code, setCode] = useState<string>('')
   const [showCopiedMessage, setShowCopiedMessage] = useState(false)
+  const [notifications, setNotifications] = useState<Notification[]>([])
 
-  // Safe toast function that won't throw if toast is undefined
-  const notifyUser = (message: string, type: 'success' | 'error' | 'info' = 'info') => {
-    try {
-      if (toastState && typeof toastState.addToast === 'function') {
-        toastState.addToast({ message, type })
-      } else {
-        console.log(`${type.toUpperCase()}: ${message}`)
-      }
-    } catch (err) {
-      console.error('Error using toast notification:', err)
-      console.log(`${type.toUpperCase()}: ${message}`)
+  // Safe notification function that doesn't rely on toast
+  const notifyUser = (message: string, type: NotificationType = 'info') => {
+    const newNotification = {
+      id: Math.random().toString(36).substring(2, 9),
+      message,
+      type
     }
+    setNotifications(prev => [...prev, newNotification])
+    console.log(`${type.toUpperCase()}: ${message}`)
+  }
+  
+  const dismissNotification = (id: string) => {
+    setNotifications(prev => prev.filter(notification => notification.id !== id))
   }
 
   useEffect(() => {
@@ -198,6 +239,17 @@ export default function WidgetDesigner() {
 
   return (
     <DashboardLayout>
+      {/* Custom notification container */}
+      <div className="fixed z-50 flex flex-col items-end top-4 right-4 space-y-4">
+        {notifications.map(notification => (
+          <NotificationItem 
+            key={notification.id} 
+            notification={notification} 
+            onDismiss={dismissNotification}
+          />
+        ))}
+      </div>
+      
       <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-semibold">Widget Designer</h1>
