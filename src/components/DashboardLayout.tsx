@@ -16,9 +16,9 @@ import {
   CreditCardIcon,
   CommandLineIcon,
   ArrowRightOnRectangleIcon,
-  CodeIcon,
+  CodeBracketIcon,
   PencilIcon,
-  TemplateIcon,
+  RectangleStackIcon,
   PuzzlePieceIcon
 } from '@heroicons/react/24/outline'
 
@@ -43,9 +43,9 @@ const navigation: NavItem[] = [
   { name: 'Settings', href: '/dashboard/settings', icon: CogIcon, current: false },
   { name: 'Widget Generator', href: '/dashboard/script-generator', icon: CommandLineIcon, current: false },
   { name: 'Subscription', href: '/dashboard/subscription', icon: CreditCardIcon, current: false },
-  { name: 'Script Generator', href: '/dashboard/script-generator', icon: CodeIcon, current: false },
+  { name: 'Script Generator', href: '/dashboard/script-generator', icon: CodeBracketIcon, current: false },
   { name: 'Widget Designer', href: '/dashboard/widget-designer', icon: PencilIcon, current: false },
-  { name: 'Templates', href: '/dashboard/templates', icon: TemplateIcon, current: false },
+  { name: 'Templates', href: '/dashboard/templates', icon: RectangleStackIcon, current: false },
   { name: 'Integrations', href: '/dashboard/integrations', icon: PuzzlePieceIcon, current: false },
 ]
 
@@ -81,7 +81,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     { name: 'Subscription', href: '/dashboard/subscription', icon: CreditCardIcon, current: currentPath === '/dashboard/subscription' },
     { name: 'Analytics', href: '/dashboard/analytics', icon: ChartBarIcon, current: currentPath === '/dashboard/analytics' },
     { name: 'Leads', href: '/dashboard/leads', icon: UserGroupIcon, current: currentPath === '/dashboard/leads' },
-    { name: 'Templates', href: '/dashboard/templates', icon: TemplateIcon, current: currentPath === '/dashboard/templates' },
+    { name: 'Templates', href: '/dashboard/templates', icon: RectangleStackIcon, current: currentPath === '/dashboard/templates' },
     { name: 'Integrations', href: '/dashboard/integrations', icon: PuzzlePieceIcon, current: currentPath === '/dashboard/integrations' },
   ]
   
