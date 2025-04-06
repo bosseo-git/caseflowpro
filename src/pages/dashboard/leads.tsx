@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
-import { CheckCircleIcon, XCircleIcon, PhoneIcon, ChatAltIcon, MailIcon, PlusIcon } from '@heroicons/react/solid'
-import { DotsVerticalIcon, SearchIcon } from '@heroicons/react/outline'
+import { CheckCircleIcon, XCircleIcon, PhoneIcon, ChatBubbleLeftRightIcon, EnvelopeIcon, PlusIcon } from '@heroicons/react/24/solid'
+import { EllipsisVerticalIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline'
 import DashboardLayout from '@/components/DashboardLayout'
 import { useUser } from '@/lib/hooks'
 
@@ -246,7 +246,7 @@ export default function LeadsPage() {
           <div className="flex flex-col md:flex-row md:items-center justify-between space-y-3 md:space-y-0 md:space-x-4">
             <div className="relative flex-1">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <SearchIcon className="h-5 w-5 text-gray-400" />
+                <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
               </div>
               <input
                 type="text"
@@ -333,7 +333,7 @@ export default function LeadsPage() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <button className="text-gray-400 hover:text-gray-500">
-                          <DotsVerticalIcon className="h-5 w-5" />
+                          <EllipsisVerticalIcon className="h-5 w-5" />
                         </button>
                       </td>
                     </tr>
@@ -412,7 +412,7 @@ export default function LeadsPage() {
                                 </a>
                               </div>
                               <div className="flex items-center">
-                                <MailIcon className="h-5 w-5 text-gray-400 mr-2" />
+                                <EnvelopeIcon className="h-5 w-5 text-gray-400 mr-2" />
                                 <a href={`mailto:${selectedLead.email}`} className="text-sm text-primary-600 hover:text-primary-500">
                                   {selectedLead.email}
                                 </a>

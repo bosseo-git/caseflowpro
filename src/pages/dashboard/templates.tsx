@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
-import { StarIcon, ArrowCircleRightIcon } from '@heroicons/react/solid'
-import { CheckIcon, XIcon } from '@heroicons/react/outline'
+import { StarIcon } from '@heroicons/react/24/solid'
+import { ArrowRightCircleIcon, CheckIcon, XMarkIcon } from '@heroicons/react/24/outline'
 import DashboardLayout from '@/components/DashboardLayout'
 import { useUser } from '@/lib/hooks'
 
@@ -433,7 +433,7 @@ export default function TemplatesPage() {
                   className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
                 >
                   Preview & Use
-                  <ArrowCircleRightIcon className="ml-1.5 h-4 w-4" />
+                  <ArrowRightCircleIcon className="ml-1.5 h-4 w-4" />
                 </button>
               </div>
             </div>

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
-import { CheckCircleIcon, ExclamationIcon, LockClosedIcon } from '@heroicons/react/solid'
-import { ExternalLinkIcon } from '@heroicons/react/outline'
+import { CheckCircleIcon, ExclamationTriangleIcon, LockClosedIcon } from '@heroicons/react/24/solid'
+import { ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline'
 import DashboardLayout from '@/components/DashboardLayout'
 import { useUser } from '@/lib/hooks'
 
@@ -294,7 +294,7 @@ export default function IntegrationsPage() {
               rel="noopener noreferrer"
               className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
             >
-              <ExternalLinkIcon className="-ml-1 mr-2 h-5 w-5" />
+              <ArrowTopRightOnSquareIcon className="-ml-1 mr-2 h-5 w-5" />
               Integration Docs
             </a>
           </div>
@@ -442,7 +442,7 @@ export default function IntegrationsPage() {
             ))
           ) : (
             <div className="col-span-3 py-12 flex flex-col items-center justify-center text-center">
-              <ExclamationIcon className="h-12 w-12 text-gray-400" />
+              <ExclamationTriangleIcon className="h-12 w-12 text-gray-400" />
               <h3 className="mt-2 text-lg font-medium text-gray-900">No integrations found</h3>
               <p className="mt-1 text-sm text-gray-500">
                 Try adjusting your search or filters to find what you're looking for.
