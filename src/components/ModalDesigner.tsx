@@ -35,6 +35,8 @@ type WidgetDesignSettings = {
 type ModalDesignerProps = {
   onSave: (settings: WidgetDesignSettings) => void
   initialSettings?: Partial<WidgetDesignSettings>
+  onClose?: () => void
+  isSaving?: boolean
 }
 
 const defaultSettings: WidgetDesignSettings = {
@@ -119,7 +121,7 @@ const layoutOptions: { label: string; value: WidgetLayout; description: string }
   },
 ]
 
-export default function ModalDesigner({ onSave, initialSettings = {} }: ModalDesignerProps) {
+export default function ModalDesigner({ onSave, initialSettings = {}, onClose, isSaving }: ModalDesignerProps) {
   const [previewOpen, setPreviewOpen] = useState(false)
 
   const { register, handleSubmit, watch, reset, formState: { errors } } = useForm<WidgetDesignSettings>({

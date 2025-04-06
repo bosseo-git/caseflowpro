@@ -4,8 +4,39 @@ import { StarIcon } from '@heroicons/react/24/solid'
 import { ArrowRightCircleIcon, CheckIcon, XMarkIcon } from '@heroicons/react/24/outline'
 import DashboardLayout from '@/components/DashboardLayout'
 import { useUser } from '@/lib/hooks'
+import WidgetPreview from '@/components/WidgetPreview'
 
 // Define types
+type WidgetPosition = 'right' | 'left'
+type WidgetLayout = 'classic' | 'modern' | 'circles' | 'compact' | 'minimalist'
+type ModalTheme = 'default' | 'minimal' | 'bordered' | 'dark' | 'branded'
+
+type WidgetDesignSettings = {
+  theme: ModalTheme
+  layout: WidgetLayout
+  position: WidgetPosition
+  primaryColor: string
+  secondaryColor: string
+  startMinimized: boolean
+  fixedToBottomRight: boolean
+  buttonPadding: 'sm' | 'md' | 'lg'
+  borderRadius: 'sm' | 'md' | 'lg' | 'full'
+  showLabels: boolean
+  animation: 'fade' | 'scale' | 'slide'
+  buttonLabels: {
+    call: string
+    sms: string
+    whatsapp: string
+    chat: string
+  }
+  buttonColors: {
+    call: string
+    sms: string
+    whatsapp: string
+    chat: string
+  }
+}
+
 type Industry = 'Law' | 'Real Estate' | 'Healthcare' | 'Dental' | 'Insurance' | 'Contractors' | 'Restaurants' | 'Various';
 type Category = 'legal' | 'real-estate' | 'healthcare' | 'finance' | 'home-services' | 'hospitality' | 'luxury';
 
@@ -18,7 +49,7 @@ type Template = {
   industry: Industry;
   popularityScore: number;
   reviewCount: number;
-  widgetSettings: any;
+  widgetSettings: WidgetDesignSettings;
 };
 
 // Sample templates data - in a real application, this would come from your backend
@@ -33,15 +64,28 @@ const availableTemplates: Template[] = [
     popularityScore: 4.9,
     reviewCount: 127,
     widgetSettings: {
+      theme: 'default',
+      layout: 'modern',
+      position: 'right',
       primaryColor: '#2C5282',
       secondaryColor: '#4299E1',
-      theme: 'light',
-      layout: 'modern',
+      startMinimized: false,
+      fixedToBottomRight: true,
+      buttonPadding: 'md',
+      borderRadius: 'md',
+      showLabels: true,
+      animation: 'scale',
       buttonLabels: {
         call: 'Free Consultation',
         sms: 'Text Us',
         whatsapp: 'WhatsApp',
         chat: 'Case Evaluation'
+      },
+      buttonColors: {
+        call: '#2C5282',
+        sms: '#4299E1',
+        whatsapp: '#38B2AC',
+        chat: '#2C5282'
       }
     }
   },
@@ -55,15 +99,28 @@ const availableTemplates: Template[] = [
     popularityScore: 4.7,
     reviewCount: 89,
     widgetSettings: {
+      theme: 'branded',
+      layout: 'classic',
+      position: 'right',
       primaryColor: '#5A67D8',
       secondaryColor: '#7F9CF5',
-      theme: 'light',
-      layout: 'classic',
+      startMinimized: false,
+      fixedToBottomRight: true,
+      buttonPadding: 'md',
+      borderRadius: 'full',
+      showLabels: true,
+      animation: 'scale',
       buttonLabels: {
         call: 'Speak to an Attorney',
         sms: 'Quick Question',
         whatsapp: 'Chat Now',
         chat: 'Schedule Consultation'
+      },
+      buttonColors: {
+        call: '#5A67D8',
+        sms: '#7F9CF5',
+        whatsapp: '#6B46C1',
+        chat: '#5A67D8'
       }
     }
   },
@@ -77,15 +134,28 @@ const availableTemplates: Template[] = [
     popularityScore: 4.8,
     reviewCount: 156,
     widgetSettings: {
+      theme: 'minimal',
+      layout: 'modern',
+      position: 'right',
       primaryColor: '#2C7A7B',
       secondaryColor: '#38B2AC',
-      theme: 'light',
-      layout: 'modern',
+      startMinimized: false,
+      fixedToBottomRight: true,
+      buttonPadding: 'md',
+      borderRadius: 'lg',
+      showLabels: true,
+      animation: 'fade',
       buttonLabels: {
         call: 'Call Agent',
         sms: 'Quick Question',
         whatsapp: 'WhatsApp',
         chat: 'Schedule Viewing'
+      },
+      buttonColors: {
+        call: '#2C7A7B',
+        sms: '#38B2AC',
+        whatsapp: '#319795',
+        chat: '#2C7A7B'
       }
     }
   },
@@ -99,15 +169,28 @@ const availableTemplates: Template[] = [
     popularityScore: 4.6,
     reviewCount: 72,
     widgetSettings: {
+      theme: 'default',
+      layout: 'modern',
+      position: 'right',
       primaryColor: '#3182CE',
       secondaryColor: '#63B3ED',
-      theme: 'light',
-      layout: 'modern',
+      startMinimized: false,
+      fixedToBottomRight: true,
+      buttonPadding: 'md',
+      borderRadius: 'md',
+      showLabels: true,
+      animation: 'scale',
       buttonLabels: {
         call: 'Book Appointment',
         sms: 'Ask a Question',
         whatsapp: 'WhatsApp Us',
         chat: 'Virtual Consult'
+      },
+      buttonColors: {
+        call: '#3182CE',
+        sms: '#63B3ED',
+        whatsapp: '#4299E1',
+        chat: '#3182CE'
       }
     }
   },
@@ -121,15 +204,28 @@ const availableTemplates: Template[] = [
     popularityScore: 4.7,
     reviewCount: 68,
     widgetSettings: {
+      theme: 'default',
+      layout: 'modern',
+      position: 'right',
       primaryColor: '#3182CE',
       secondaryColor: '#4FD1C5',
-      theme: 'light',
-      layout: 'modern',
+      startMinimized: false,
+      fixedToBottomRight: true,
+      buttonPadding: 'md',
+      borderRadius: 'md',
+      showLabels: true,
+      animation: 'scale',
       buttonLabels: {
         call: 'Schedule Cleaning',
         sms: 'Quick Question',
         whatsapp: 'WhatsApp',
         chat: 'Emergency Care'
+      },
+      buttonColors: {
+        call: '#3182CE',
+        sms: '#4FD1C5',
+        whatsapp: '#38B2AC',
+        chat: '#3182CE'
       }
     }
   },
@@ -143,15 +239,28 @@ const availableTemplates: Template[] = [
     popularityScore: 4.5,
     reviewCount: 94,
     widgetSettings: {
+      theme: 'bordered',
+      layout: 'classic',
+      position: 'right',
       primaryColor: '#1A365D',
       secondaryColor: '#2B6CB0',
-      theme: 'light',
-      layout: 'classic',
+      startMinimized: false,
+      fixedToBottomRight: true,
+      buttonPadding: 'md',
+      borderRadius: 'sm',
+      showLabels: true,
+      animation: 'scale',
       buttonLabels: {
         call: 'Get a Quote',
         sms: 'Quick Question',
         whatsapp: 'WhatsApp',
         chat: 'Compare Plans'
+      },
+      buttonColors: {
+        call: '#1A365D',
+        sms: '#2B6CB0',
+        whatsapp: '#2C5282',
+        chat: '#1A365D'
       }
     }
   },
@@ -165,15 +274,28 @@ const availableTemplates: Template[] = [
     popularityScore: 4.8,
     reviewCount: 113,
     widgetSettings: {
+      theme: 'default',
+      layout: 'modern',
+      position: 'right',
       primaryColor: '#C05621',
       secondaryColor: '#ED8936',
-      theme: 'light',
-      layout: 'modern',
+      startMinimized: false,
+      fixedToBottomRight: true,
+      buttonPadding: 'md',
+      borderRadius: 'md',
+      showLabels: true,
+      animation: 'scale',
       buttonLabels: {
         call: 'Free Estimate',
         sms: 'Quick Question',
         whatsapp: 'Send Photos',
         chat: 'Emergency Service'
+      },
+      buttonColors: {
+        call: '#C05621',
+        sms: '#ED8936',
+        whatsapp: '#DD6B20',
+        chat: '#C05621'
       }
     }
   },
@@ -187,15 +309,28 @@ const availableTemplates: Template[] = [
     popularityScore: 4.6,
     reviewCount: 87,
     widgetSettings: {
-      primaryColor: '#C53030',
-      secondaryColor: '#F56565',
       theme: 'dark',
       layout: 'modern',
+      position: 'right',
+      primaryColor: '#C53030',
+      secondaryColor: '#F56565',
+      startMinimized: false,
+      fixedToBottomRight: true,
+      buttonPadding: 'md',
+      borderRadius: 'full',
+      showLabels: true,
+      animation: 'fade',
       buttonLabels: {
         call: 'Reservations',
         sms: 'Order Takeout',
         whatsapp: 'Special Events',
         chat: 'View Menu'
+      },
+      buttonColors: {
+        call: '#C53030',
+        sms: '#F56565',
+        whatsapp: '#E53E3E',
+        chat: '#C53030'
       }
     }
   },
@@ -209,15 +344,28 @@ const availableTemplates: Template[] = [
     popularityScore: 4.9,
     reviewCount: 142,
     widgetSettings: {
-      primaryColor: '#D4AF37',
-      secondaryColor: '#B8860B',
       theme: 'dark',
       layout: 'modern',
+      position: 'right',
+      primaryColor: '#D4AF37',
+      secondaryColor: '#B8860B',
+      startMinimized: false,
+      fixedToBottomRight: true,
+      buttonPadding: 'md',
+      borderRadius: 'md',
+      showLabels: true,
+      animation: 'scale',
       buttonLabels: {
         call: 'Call Now',
         sms: 'Message Us',
         whatsapp: 'WhatsApp',
         chat: 'Live Support'
+      },
+      buttonColors: {
+        call: '#D4AF37',
+        sms: '#B8860B',
+        whatsapp: '#DAA520',
+        chat: '#D4AF37'
       }
     }
   }
@@ -236,6 +384,7 @@ export default function TemplatesPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
   
   // In a real application, fetch templates data here
   useEffect(() => {
@@ -297,13 +446,28 @@ export default function TemplatesPage() {
   
   const closeTemplateModal = () => {
     setIsModalOpen(false);
+    setShowPreview(false);
     setTimeout(() => setSelectedTemplate(null), 300); // Wait for animation to finish
   };
   
-  const useTemplate = (template: Template) => {
+  const useTemplate = async (template: Template) => {
     // In a real app, you would call an API to apply the template to the user's widget
-    // Then redirect to the script generator with the new settings
-    router.push('/dashboard/script-generator');
+    try {
+      // Simulate API call
+      console.log('Applying template:', template.id);
+      
+      // In a real implementation, you'd save the settings to your backend:
+      // await fetch('/api/widget-settings', {
+      //   method: 'POST',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify(template.widgetSettings),
+      // });
+      
+      // Then redirect to the widget designer with the applied template
+      router.push('/dashboard/widget-designer');
+    } catch (error) {
+      console.error('Error applying template:', error);
+    }
   };
 
   // Render star rating
@@ -323,6 +487,11 @@ export default function TemplatesPage() {
         <span className="ml-1 text-sm text-gray-600">{score.toFixed(1)}</span>
       </div>
     );
+  };
+
+  // Function to open the preview
+  const openPreview = () => {
+    setShowPreview(true);
   };
 
   if (loading || isLoading) {
@@ -384,10 +553,44 @@ export default function TemplatesPage() {
               key={template.id}
               className="bg-white overflow-hidden shadow rounded-lg border border-gray-200 flex flex-col"
             >
-              <div className="h-48 bg-gray-200 relative">
-                {/* Placeholder for template preview image */}
-                <div className="absolute inset-0 flex items-center justify-center text-gray-500">
-                  <span className="text-lg font-semibold">{template.name} Preview</span>
+              <div 
+                className="h-48 bg-gray-100 relative cursor-pointer overflow-hidden group"
+                onClick={() => openTemplateModal(template)}
+              >
+                {/* Display a snapshot of the widget */}
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div 
+                    className={`h-10 px-3 flex items-center justify-center rounded-md shadow-md text-white text-sm font-medium`}
+                    style={{ backgroundColor: template.widgetSettings.primaryColor }}
+                  >
+                    {template.widgetSettings.layout === 'classic' ? (
+                      <span>Contact Us</span>
+                    ) : (
+                      <div className="flex space-x-2">
+                        <div className="rounded-full h-6 w-6 flex items-center justify-center" 
+                            style={{ backgroundColor: template.widgetSettings.buttonColors.call }}>
+                          <span className="text-xs">C</span>
+                        </div>
+                        <div className="rounded-full h-6 w-6 flex items-center justify-center"
+                            style={{ backgroundColor: template.widgetSettings.buttonColors.sms }}>
+                          <span className="text-xs">S</span>
+                        </div>
+                        <div className="rounded-full h-6 w-6 flex items-center justify-center"
+                            style={{ backgroundColor: template.widgetSettings.buttonColors.chat }}>
+                          <span className="text-xs">M</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                
+                {/* Overlay with "Preview" button */}
+                <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                  <button 
+                    className="px-4 py-2 bg-white text-gray-900 rounded-md shadow-lg font-medium"
+                  >
+                    Preview Template
+                  </button>
                 </div>
               </div>
               
@@ -458,16 +661,52 @@ export default function TemplatesPage() {
                 <div className="bg-white px-4 pt-5 pb-4 sm:p-6">
                   <div className="sm:flex sm:items-start">
                     <div className="mt-3 text-center sm:mt-0 sm:text-left w-full">
-                      <h3 className="text-lg leading-6 font-medium text-gray-900">
-                        {selectedTemplate.name} Template
-                      </h3>
+                      <div className="flex justify-between items-center">
+                        <h3 className="text-lg leading-6 font-medium text-gray-900">
+                          {selectedTemplate.name} Template
+                        </h3>
+                        <button
+                          type="button"
+                          onClick={closeTemplateModal}
+                          className="text-gray-400 hover:text-gray-500"
+                        >
+                          <XMarkIcon className="h-5 w-5" />
+                        </button>
+                      </div>
                       
-                      <div className="mt-4 bg-gray-100 rounded-lg overflow-hidden">
-                        <div className="h-56 bg-gray-200 relative">
-                          {/* Placeholder for template preview image */}
-                          <div className="absolute inset-0 flex items-center justify-center text-gray-500">
-                            <span className="text-lg font-semibold">Live Preview</span>
-                          </div>
+                      <div className="mt-4">
+                        <div className="bg-gray-100 rounded-lg overflow-hidden relative h-56">
+                          <button
+                            className="absolute inset-0 w-full h-full flex items-center justify-center"
+                            onClick={openPreview}
+                          >
+                            <div 
+                              className={`h-12 px-4 flex items-center justify-center rounded-md shadow-md text-white font-medium`}
+                              style={{ backgroundColor: selectedTemplate.widgetSettings.primaryColor }}
+                            >
+                              {selectedTemplate.widgetSettings.layout === 'classic' ? (
+                                <span>See Live Preview</span>
+                              ) : (
+                                <div className="flex space-x-3">
+                                  <div className={`rounded-full h-8 w-8 flex items-center justify-center`}
+                                        style={{ backgroundColor: selectedTemplate.widgetSettings.buttonColors.call }}>
+                                    <span>C</span>
+                                  </div>
+                                  <div className={`rounded-full h-8 w-8 flex items-center justify-center`}
+                                        style={{ backgroundColor: selectedTemplate.widgetSettings.buttonColors.sms }}>
+                                    <span>S</span>
+                                  </div>
+                                  <div className={`rounded-full h-8 w-8 flex items-center justify-center`}
+                                        style={{ backgroundColor: selectedTemplate.widgetSettings.buttonColors.chat }}>
+                                    <span>M</span>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                            <div className="absolute bottom-4 left-0 right-0 text-center text-gray-600 font-medium">
+                              Click to see live preview
+                            </div>
+                          </button>
                         </div>
                       </div>
                       
@@ -548,6 +787,15 @@ export default function TemplatesPage() {
               </div>
             </div>
           </div>
+        )}
+        
+        {/* Live Widget Preview */}
+        {selectedTemplate && (
+          <WidgetPreview 
+            settings={selectedTemplate.widgetSettings}
+            isOpen={showPreview}
+            onClose={() => setShowPreview(false)}
+          />
         )}
       </div>
     </DashboardLayout>
