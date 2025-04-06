@@ -3,21 +3,36 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/router'
 import Head from 'next/head'
 import { toast } from '@/components/ui/Toaster'
-import DashboardLayout from '@/components/layouts/DashboardLayout'
+import DashboardLayout from '@/components/DashboardLayout'
 import ModalDesigner from '@/components/ModalDesigner'
 
-type ModalDesignSettings = {
+type WidgetPosition = 'right' | 'left'
+type WidgetLayout = 'classic' | 'modern' | 'circles' | 'compact' | 'minimalist'
+
+type WidgetDesignSettings = {
   theme: 'default' | 'minimal' | 'bordered' | 'dark' | 'branded'
-  title: string
-  message: string
-  buttonLabel: string
-  size: 'sm' | 'md' | 'lg' | 'xl'
-  animation: 'fade' | 'scale' | 'slide'
-  position: 'center' | 'top'
+  layout: WidgetLayout
+  position: WidgetPosition
   primaryColor: string
-  autoClose: boolean
-  autoCloseDelay: number
-  showCloseButton: boolean
+  secondaryColor: string
+  startMinimized: boolean
+  fixedToBottomRight: boolean
+  buttonPadding: 'sm' | 'md' | 'lg'
+  borderRadius: 'sm' | 'md' | 'lg' | 'full'
+  showLabels: boolean
+  animation: 'fade' | 'scale' | 'slide'
+  buttonLabels: {
+    call: string
+    sms: string
+    whatsapp: string
+    chat: string
+  }
+  buttonColors: {
+    call: string
+    sms: string
+    whatsapp: string
+    chat: string
+  }
 }
 
 export default function WidgetDesigner() {
@@ -25,7 +40,7 @@ export default function WidgetDesigner() {
   const router = useRouter()
   const [isSaving, setIsSaving] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
-  const [savedSettings, setSavedSettings] = useState<ModalDesignSettings | null>(null)
+  const [savedSettings, setSavedSettings] = useState<WidgetDesignSettings | null>(null)
 
   console.log('Widget Designer - Rendering', { status, session: session?.user?.email })
 
@@ -59,7 +74,7 @@ export default function WidgetDesigner() {
       })
       
       if (data.settings) {
-        setSavedSettings(data.settings as ModalDesignSettings)
+        setSavedSettings(data.settings as WidgetDesignSettings)
       }
     } catch (error) {
       console.error('Error loading widget settings:', error)
@@ -69,8 +84,8 @@ export default function WidgetDesigner() {
     }
   }
 
-  // Handle when modal settings are saved
-  const handleSaveSettings = async (settings: ModalDesignSettings) => {
+  // Handle when widget settings are saved
+  const handleSaveSettings = async (settings: WidgetDesignSettings) => {
     try {
       setIsSaving(true)
       
@@ -87,13 +102,13 @@ export default function WidgetDesigner() {
       
       if (response.ok) {
         setSavedSettings(settings)
-        toast('Modal design saved successfully!', 'success')
+        toast('Widget design saved successfully!', 'success')
       } else {
         throw new Error(data.error || 'Failed to save settings')
       }
     } catch (error) {
-      console.error('Error saving modal settings:', error)
-      toast('Failed to save modal settings', 'error')
+      console.error('Error saving widget settings:', error)
+      toast('Failed to save widget settings', 'error')
     } finally {
       setIsSaving(false)
     }
@@ -180,9 +195,9 @@ export default function WidgetDesigner() {
 
           <div className="bg-white shadow rounded-lg p-6">
             <div className="mb-4">
-              <h2 className="text-xl font-semibold text-gray-900">Form Fields</h2>
+              <h2 className="text-xl font-semibold text-gray-900">Inner Form Configuration</h2>
               <p className="mt-1 text-sm text-gray-500">
-                Configure which fields to collect in your intake form.
+                Configure which fields to collect in your intake form when users click on buttons.
               </p>
             </div>
             

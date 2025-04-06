@@ -309,59 +309,41 @@ export default function ScriptGenerator() {
       buttonsContainer.style.gap = '10px';
     }
     
-    // Create button function with layout-specific styling
-    function createButton(icon, text, action, color, buttonType) {
+    // Create button helper
+    function createButton(iconSvg, label, onClick, colorHover, buttonType) {
       var button = document.createElement('button');
+      button.className = 'caseflowpro-button ' + buttonType + '-button';
+      button.setAttribute('aria-label', label);
+      button.addEventListener('click', onClick);
       
-      if (layout === 'modern') {
-        // Modern circle button
-        button.style.width = '80px';
-        button.style.padding = '0';
-        button.style.display = 'flex';
-        button.style.flexDirection = 'column';
-        button.style.alignItems = 'center';
-        button.style.background = 'none';
-        button.style.border = 'none';
-        button.style.cursor = 'pointer';
-        
-        var iconCircle = document.createElement('div');
-        iconCircle.innerHTML = icon;
-        iconCircle.style.width = '60px';
-        iconCircle.style.height = '60px';
-        iconCircle.style.borderRadius = '50%';
-        iconCircle.style.backgroundColor = buttonColors[buttonType];
-        iconCircle.style.display = 'flex';
-        iconCircle.style.alignItems = 'center';
-        iconCircle.style.justifyContent = 'center';
-        iconCircle.style.marginBottom = '8px';
-        iconCircle.style.color = 'white';
-        
-        var textSpan = document.createElement('span');
-        textSpan.textContent = text;
-        textSpan.style.fontSize = '12px';
-        textSpan.style.color = theme === 'dark' ? '#D4AF37' : '#333';
-        
-        button.appendChild(iconCircle);
-        button.appendChild(textSpan);
-      } else {
-        // Classic button style
-        button.innerHTML = icon + '<span>' + text + '</span>';
-        button.style.display = 'flex';
-        button.style.flexDirection = 'column';
-        button.style.alignItems = 'center';
-        button.style.justifyContent = 'center';
-        button.style.padding = '16px 8px';
-        button.style.backgroundColor = theme === 'dark' ? '#2D2D2D' : color;
-        button.style.color = theme === 'dark' ? '#D4AF37' : 'white';
-        button.style.border = theme === 'dark' ? '1px solid #444444' : 'none';
-        button.style.borderRadius = theme === 'dark' ? '12px' : '6px';
-        button.style.fontWeight = 'bold';
-        button.style.fontSize = '14px';
-        button.style.gap = '8px';
-      }
-      
+      button.style.display = 'flex';
+      button.style.alignItems = 'center';
+      button.style.justifyContent = 'flex-start';
+      button.style.width = '100%';
+      button.style.padding = '12px 16px'; // Improved padding
+      button.style.margin = '8px 0';
+      button.style.border = 'none';
+      button.style.borderRadius = '8px';
+      button.style.backgroundColor = colorHover;
+      button.style.color = '#ffffff';
+      button.style.fontWeight = '500';
       button.style.cursor = 'pointer';
-      button.addEventListener('click', action);
+      button.style.transition = 'all 0.2s ease';
+      button.style.boxShadow = '0 2px 5px rgba(0, 0, 0, 0.1)';
+      
+      // Add icon and label
+      var icon = document.createElement('span');
+      icon.innerHTML = iconSvg;
+      icon.style.display = 'flex';
+      icon.style.alignItems = 'center';
+      icon.style.marginRight = '10px'; // Space between icon and text
+      
+      var text = document.createElement('span');
+      text.textContent = label;
+      
+      button.appendChild(icon);
+      button.appendChild(text);
+      
       return button;
     }
     
@@ -989,6 +971,16 @@ export default function ScriptGenerator() {
                 className="input-field w-full"
               />
             </div>
+          </div>
+
+          {/* Save Button */}
+          <div className="mt-6 flex justify-end">
+            <button
+              onClick={handleSaveSettings}
+              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+            >
+              {isSaving ? 'Saving...' : 'Save Settings'}
+            </button>
           </div>
 
           <h3 className="text-md font-medium mt-6 mb-3">Button Actions</h3>
