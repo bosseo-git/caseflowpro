@@ -7,6 +7,8 @@ const prisma = new PrismaClient()
 interface WidgetSettings {
   theme?: string
   primaryColor?: string
+  useExternalScript?: boolean
+  externalScript?: string
   [key: string]: any
 }
 
@@ -40,12 +42,14 @@ export default async function handler(
       return res.status(404).end(`console.error("CaseFlowPro: User not found");`)
     }
     
-    // Get the theme from settings
+    // Get settings
     const settings = user.ghlSettings as WidgetSettings || {}
     const theme = settings.theme || 'default'
     const primaryColor = settings.primaryColor || '#4F46E5'
+    const useExternalScript = settings.useExternalScript || false
+    const externalScript = settings.externalScript || ''
     
-    // Generate a simple widget code
+    // Generate a widget code that only shows GHL widget on button click
     const widgetCode = `
       (function() {
         const container = document.createElement('div');
@@ -85,12 +89,25 @@ export default async function handler(
             border: none;
             display: none;
           }
+          .widget-open-icon {
+            display: inline-block;
+            margin-right: 8px;
+          }
+          .widget-open-icon.active {
+            color: #ffffff;
+          }
+          .hidden-ghl-widget {
+            display: none !important;
+          }
+          body.ghl-widget-active .hidden-ghl-widget {
+            display: block !important;
+          }
         \`;
         document.head.appendChild(styles);
         
         const button = document.createElement('div');
         button.id = 'caseflowpro-button';
-        button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>Contact Us';
+        button.innerHTML = '<div class="icon widget-open-icon active">💬</div> Contact Us';
         
         const iframe = document.createElement('iframe');
         iframe.id = 'caseflowpro-iframe';
@@ -100,14 +117,44 @@ export default async function handler(
         container.appendChild(iframe);
         document.body.appendChild(container);
         
+        ${useExternalScript ? `
+        // Add external script (GoHighLevel)
+        const externalScriptContainer = document.createElement('div');
+        externalScriptContainer.classList.add('hidden-ghl-widget');
+        externalScriptContainer.innerHTML = \`${externalScript}\`;
+        document.body.appendChild(externalScriptContainer);
+        
+        // Initially hide all GHL widgets
+        function hideGHLWidgets() {
+          const ghlWidgets = document.querySelectorAll('[id^="lc_chat_"]');
+          ghlWidgets.forEach(widget => {
+            widget.classList.add('hidden-ghl-widget');
+          });
+        }
+        
+        // Check for GHL widgets and hide them
+        setTimeout(hideGHLWidgets, 1000);
+        setTimeout(hideGHLWidgets, 2000);
+        ` : ''}
+        
         button.addEventListener('click', function() {
+          ${useExternalScript ? `
+          // When using external script, activate GHL widget
+          document.body.classList.add('ghl-widget-active');
+          // Add active class to button icon
+          const icon = button.querySelector('.widget-open-icon');
+          if (icon) icon.classList.add('active');
+          ` : `
+          // Use default iframe behavior when external script is not enabled
           iframe.style.display = 'block';
+          `}
         });
         
         window.addEventListener('message', function(event) {
           if (event.origin !== 'https://caseflowpro.vercel.app') return;
           if (event.data === 'caseflowpro:close') {
             iframe.style.display = 'none';
+            document.body.classList.remove('ghl-widget-active');
           }
         });
       })();
